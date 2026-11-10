@@ -6,17 +6,17 @@ The helper is a small program that runs on your Mac. The Figma To Rive plugin ne
 ## Start it
 
 1. Open **Terminal**.
-2. Easiest: double-click **`Start Helper.command`** in the repo root. It also signs you in to Rive and picks your push project.
+2. Easiest: double-click **`Start Helper.command`** in the `Fig To Rive` folder. It also signs you in to Rive and picks your push project.
    Or paste this and press Enter (use your own folder path):
 
 ```bash
-cd "/path/to/riveCLi/Figma to Rive" && node pick-project.js && node serve.js
+cd "/path/to/riveCLi/Fig To Rive" && node helper/pick-project.js && node helper/serve.js
 ```
 
 You should see three lines:
 
 ```
-Figma to Rive helper on http://localhost:4747
+Fig To Rive helper on http://localhost:4747
 Token (paste into the plugin once): ...
 Real fonts go in: .../Fonts Library
 ```
@@ -25,7 +25,7 @@ Real fonts go in: .../Fonts Library
 
 ## Token
 
-Your token is saved in the file `.token` in this folder (a hidden file), and the plugin remembers it after the first time.
+Your token is saved in the hidden file `.token` in the `Fig To Rive` folder, and the plugin remembers it after the first time.
 If the plugin has no token, it opens the settings panel for you: click the gear icon, paste the token the helper printed, press Enter.
 
 ## Stop it
@@ -46,7 +46,7 @@ Press **Ctrl-C** in the Terminal tab where it is running.
 - Listens on your own computer only (`localhost`), and every request needs the token.
 - Runs only two commands: `rive <folder> --verify` and `rive push`.
 - Nothing is uploaded to your Rive account until you click the push button in the plugin.
-- **Send to Claude** saves a report in `Exports/claude-inbox/`. Then tell Claude: "check the inbox".
+- **Send to Claude** saves a report in `claude-inbox/` (in this folder). Then tell Claude: "check the inbox".
 
 ## Where things are saved
-Next to the plugin folder: `../Exports/` (exports and the Claude inbox) and `../Fonts Library/` (put your `.ttf` files here).
+Next to the `Fig To Rive` folder: `Exports/` (exports and backups) and `Projects/` (your Rive projects). Inside `Fig To Rive`: `claude-inbox/` (what "Send to Claude" saves) and `Fonts Library/` (put your `.ttf` files here).

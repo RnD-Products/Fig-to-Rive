@@ -1,6 +1,6 @@
 // node run.js sample.json <outDir>  -> writes scene.rml, rive.yaml, and prints warnings + fonts needed
 const fs = require('fs'), path = require('path');
-const { convert } = require('../convert.js');
+const { convert } = require('../plugin/convert.js');
 const [,, inFile, outDir] = process.argv;
 const res = convert(JSON.parse(fs.readFileSync(inFile, 'utf8')), { name: 'figma-import' });
 fs.mkdirSync(outDir, { recursive: true });
