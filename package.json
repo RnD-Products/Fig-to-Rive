@@ -1,0 +1,11 @@
+{
+  "name": "fig-to-rive",
+  "private": true,
+  "description": "Figma plugin and local helper that turn frames into Rive files",
+  "scripts": {
+    "start": "node helper/start.js",
+    "build": "cd plugin && node build.js",
+    "test": "node test/run.js test/sample.json out-test"
+  },
+  "engines": { "node": ">=18" }
+}

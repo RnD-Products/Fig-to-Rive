@@ -4,13 +4,13 @@ Do these in order. The whole thing takes a few minutes.
 
 ## 1. Get the files
 ```bash
-git clone https://github.com/RnD-Products/Fig-to-Rive.git
+git clone https://github.com/RnD-Products/riveCLi.git
 ```
 The repo is private, so GitHub must be signed in on that computer: use GitHub Desktop, or run `gh auth login` first.
 
 ## 2. Run the setup check
 ```bash
-cd Fig-to-Rive && ./scripts/setup.sh
+cd riveCLi/"Fig To Rive" && ./scripts/setup.sh
 ```
 It checks Node.js, the Rive CLI, your Rive login, the fonts and the kit projects, and tells you what to fix.
 - If it says **Permission denied**, run `chmod +x scripts/setup.sh` once and try again.
@@ -35,6 +35,19 @@ To stop it, press Ctrl-C in that window.
 In the Figma desktop app: Plugins -> Development -> Import plugin from manifest -> pick `Fig To Rive/plugin/manifest.json`.
 Open the plugin, click the **gear icon**, paste the token from step 4 and press **Enter** (first time only). The dot next to the
 gear turns green when the helper is connected.
+
+## Which computers work?
+The Figma plugin itself runs anywhere Figma desktop runs. The helper needs only **Node.js 18 or newer** and the **Rive CLI**.
+
+| | Start the helper | Animate (`animate.sh`) |
+|---|---|---|
+| **Mac** | double-click `Start Helper.command` | double-click `Animate.command` (needs Python 3) |
+| **Windows** | double-click `Start Helper.bat` | run it in Git Bash or WSL (needs Python 3 and bash) |
+| **Linux** | `./"Start Helper.command"` | `./scripts/animate.sh <link>` (needs Python 3) |
+| **Any** | `npm start` (or `node helper/start.js`) | |
+
+If the Rive CLI is somewhere unusual, set `RIVE_BIN` to its full path. The helper looks in `~/.rive/bin/`, then on your PATH.
+The plugin must run from Figma **desktop** (Plugins -> Development) and the helper must be on the same computer.
 
 ## Using a different Rive account?
 - In each `Projects/*/rive.yaml`, delete the `push:` lines. They hold the ids of the Rive file it was uploaded to.

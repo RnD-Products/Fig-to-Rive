@@ -24,7 +24,10 @@ import json, math, os, re, shutil, subprocess, sys
 import xml.etree.ElementTree as ET
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-RIVE = os.path.expanduser('~/.rive/bin/rive')
+def _rive():
+    p = os.environ.get('RIVE_BIN') or os.path.expanduser('~/.rive/bin/rive' + ('.exe' if os.name == 'nt' else ''))
+    return p if os.path.exists(p) else (shutil.which('rive') or 'rive')
+RIVE = _rive()
 PALETTE = ['502ABD76', '504D75E2', '50FF8A4D', '508B6BFF', '50E060F0', '50F0A040']
 
 
@@ -158,7 +161,7 @@ def main():
         print('wrote motion.json with %d items' % len(items))
     else:
         print('keeping the existing motion.json')
-    r = run(['python3', os.path.join(HERE, 'animate_kit.py'), proj, motion], proj, quiet=False)
+    r = run([sys.executable, os.path.join(HERE, 'animate_kit.py'), proj, motion], proj, quiet=False)
     print(r.stdout.strip().splitlines()[-1] if r.stdout.strip() else r.stderr[-300:])
     v = run([RIVE, '.', '--verify'], proj)
     print((v.stdout + v.stderr).strip().splitlines()[-1])

@@ -10,7 +10,7 @@ const { execFile } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const PORT = +process.env.PORT || 4747;
-const RIVE = process.env.RIVE_BIN || path.join(os.homedir(), '.rive', 'bin', 'rive');
+const RIVE = require('./rive-bin')();
 const CONFIG = path.join(ROOT, 'config.json');
 const cfg = fs.existsSync(CONFIG) ? JSON.parse(fs.readFileSync(CONFIG, 'utf8')) : {};
 // Exports and the fonts library live NEXT TO the plugin folder (not inside it), so the plugin folder holds only code and
