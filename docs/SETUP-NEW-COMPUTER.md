@@ -36,6 +36,19 @@ In the Figma desktop app: Plugins -> Development -> Import plugin from manifest 
 Open the plugin, click the **gear icon**, paste the token from step 4 and press **Enter** (first time only). The dot next to the
 gear turns green when the helper is connected.
 
+## Which computers work?
+The Figma plugin itself runs anywhere Figma desktop runs. The helper needs only **Node.js 18 or newer** and the **Rive CLI**.
+
+| | Start the helper | Animate (`animate.sh`) |
+|---|---|---|
+| **Mac** | double-click `Start Helper.command` | double-click `Animate.command` (needs Python 3) |
+| **Windows** | double-click `Start Helper.bat` | run it in Git Bash or WSL (needs Python 3 and bash) |
+| **Linux** | `./"Start Helper.command"` | `./scripts/animate.sh <link>` (needs Python 3) |
+| **Any** | `npm start` (or `node helper/start.js`) | |
+
+If the Rive CLI is somewhere unusual, set `RIVE_BIN` to its full path. The helper looks in `~/.rive/bin/`, then on your PATH.
+The plugin must run from Figma **desktop** (Plugins -> Development) and the helper must be on the same computer.
+
 ## Using a different Rive account?
 - In each `Projects/*/rive.yaml`, delete the `push:` lines. They hold the ids of the Rive file it was uploaded to.
 - You do not need to edit `Fig To Rive/config.json`: `Start Helper.command` picks a project from your account and saves it there.

@@ -7,6 +7,7 @@ The helper is a small program that runs on your Mac. The Figma To Rive plugin ne
 
 1. Open **Terminal**.
 2. Easiest: double-click **`Start Helper.command`** in the `Fig To Rive` folder. It also signs you in to Rive and picks your push project.
+   On Windows double-click **`Start Helper.bat`**; anywhere you can run `npm start`.
    Or paste this and press Enter (use your own folder path):
 
 ```bash

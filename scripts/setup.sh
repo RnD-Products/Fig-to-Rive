@@ -12,7 +12,7 @@ if command -v node >/dev/null 2>&1; then ok "Node.js $(node --version)"
 else bad "Node.js is missing. Install it from https://nodejs.org, then run ./scripts/setup.sh again."; fi
 
 # 2) Rive CLI
-RIVE="$(command -v rive 2>/dev/null)"; [ -z "$RIVE" ] && [ -x "$HOME/.rive/bin/rive" ] && RIVE="$HOME/.rive/bin/rive"
+RIVE="$(command -v rive 2>/dev/null)"; [ -z "$RIVE" ] && [ -x "${RIVE_BIN:-$HOME/.rive/bin/rive}" ] && RIVE="${RIVE_BIN:-$HOME/.rive/bin/rive}"
 if [ -z "$RIVE" ]; then
   echo "  ✗ The Rive CLI is not installed."
   read -r -p "    Install it now from releases.rive.app? [y/N] " a

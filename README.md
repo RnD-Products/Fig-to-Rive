@@ -29,6 +29,8 @@ test/                  converter and analyzer tests
 claude-inbox/          saved by "Send to Claude"
 Fonts Library/         your .ttf files
 ```
+**Runs on Mac, Windows and Linux** (Node.js 18+ and the Rive CLI; Python 3 only for animation). Start the helper with
+`Start Helper.command` (Mac), `Start Helper.bat` (Windows) or `npm start` (any). Details: `docs/SETUP-NEW-COMPUTER.md`.
 Run the commands below from this folder. Import the plugin in Figma from `plugin/manifest.json`.
 
 A Figma plugin that exports the selected frames as a Rive CLI project.
