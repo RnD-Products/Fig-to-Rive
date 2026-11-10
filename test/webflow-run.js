@@ -1,6 +1,6 @@
 const fs=require('fs'),path=require('path');
-const {convert}=require('../convert.js');
-const W=require('../webflow.js');
+const {convert}=require('../plugin/convert.js');
+const W=require('../plugin/webflow.js');
 const [,,inFile,outDir,mode]=process.argv;
 const res=convert(JSON.parse(fs.readFileSync(inFile,'utf8')),{name:'t'});
 fs.mkdirSync(outDir,{recursive:true});

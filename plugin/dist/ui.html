@@ -1351,7 +1351,7 @@
  *   - shapes sitting straight under a layout box are stretched,
  *   - scale on a layout box is ignored (not handled here: it only matters for animation).
  * This pass rewrites the structure so the picture comes out the same in both. It works on the RML text, so the same
- * file runs in the plugin UI and in Node. It is the JavaScript twin of Projects/tools/webflow_patch.py and flatten_layout.py.
+ * file runs in the plugin UI and in Node. It is the JavaScript twin of tools/webflow_patch.py and flatten_layout.py.
  *
  * WebflowSafe.apply(rmlText) -> rmlText
  */
@@ -2087,9 +2087,9 @@ function sendToInbox(m) {
   var note = document.getElementById('sendNote');
   function show(cls, html) { if (note) { note.className = 'box ' + cls; note.innerHTML = html; } else analysisOut.insertAdjacentHTML('afterbegin', '<div class="box ' + cls + '">' + html + '</div>'); }
   call('/inbox', { name: name, report: report, snapshot: snapshot, previews: previews }).then(function (r) {
-    show('ok', '<b>Sent to Claude.</b><br>Saved ' + r.previews + ' preview image(s), the report and the design data in <code>Exports/claude-inbox</code>.<br>Now tell Claude in the chat: <b>“check the inbox”</b>.');
+    show('ok', '<b>Sent to Claude.</b><br>Saved ' + r.previews + ' preview image(s), the report and the design data in <code>Fig To Rive/claude-inbox</code>.<br>Now tell Claude in the chat: <b>“check the inbox”</b>.');
   }).catch(function (er) {
-    show('bad', '<b>Could not reach the helper.</b> ' + esc(er.message) + '<br>Run <code>node serve.js</code> in the plugin folder, and paste its token on the Import tab.');
+    show('bad', '<b>Could not reach the helper.</b> ' + esc(er.message) + '<br>Run <code>node helper/serve.js</code> in the plugin folder, and paste its token on the Import tab.');
   });
 }
 function runAnalysis() { analysisOut.innerHTML = '<p class="muted">Analysing…</p>'; parent.postMessage({ pluginMessage: { type: 'analyze' } }, '*'); }

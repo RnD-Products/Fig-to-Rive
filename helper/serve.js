@@ -8,7 +8,7 @@
 const http = require('http'), fs = require('fs'), path = require('path'), os = require('os'), crypto = require('crypto');
 const { execFile } = require('child_process');
 
-const ROOT = __dirname;
+const ROOT = path.resolve(__dirname, '..');
 const PORT = +process.env.PORT || 4747;
 const RIVE = process.env.RIVE_BIN || path.join(os.homedir(), '.rive', 'bin', 'rive');
 const CONFIG = path.join(ROOT, 'config.json');
@@ -16,7 +16,7 @@ const cfg = fs.existsSync(CONFIG) ? JSON.parse(fs.readFileSync(CONFIG, 'utf8')) 
 // Exports and the fonts library live NEXT TO the plugin folder (not inside it), so the plugin folder holds only code and
 // is safe to put on GitHub. Change them in config.json with "exportsDir" / "fontsDir" (absolute, or relative to this folder).
 const EXPORTS = path.resolve(ROOT, cfg.exportsDir || '../Exports');
-const FONTS = path.resolve(ROOT, cfg.fontsDir || '../Fonts Library');
+const FONTS = path.resolve(ROOT, cfg.fontsDir || 'Fonts Library');
 fs.mkdirSync(EXPORTS, { recursive: true }); fs.mkdirSync(FONTS, { recursive: true });
 // projectId: the Rive project new files are created in. Run `rive ls --plain` to list yours.
 
@@ -160,7 +160,7 @@ function mergeIntoExisting(existing, incoming, replace) {
 }
 
 // ---- inbox: a design report Claude can read ---------------------------------
-const INBOX = path.join(EXPORTS, 'claude-inbox');
+const INBOX = path.resolve(ROOT, cfg.inboxDir || 'claude-inbox');
 function summaryMd(name, rep, previews) {
   const sevName = { error: 'Fix before importing', warning: 'Will look different', info: 'Tips' };
   let md = '# Design report: ' + name + '\n\n';

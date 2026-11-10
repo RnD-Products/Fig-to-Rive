@@ -7,7 +7,7 @@
  *   - shapes sitting straight under a layout box are stretched,
  *   - scale on a layout box is ignored (not handled here: it only matters for animation).
  * This pass rewrites the structure so the picture comes out the same in both. It works on the RML text, so the same
- * file runs in the plugin UI and in Node. It is the JavaScript twin of Projects/tools/webflow_patch.py and flatten_layout.py.
+ * file runs in the plugin UI and in Node. It is the JavaScript twin of tools/webflow_patch.py and flatten_layout.py.
  *
  * WebflowSafe.apply(rmlText) -> rmlText
  */

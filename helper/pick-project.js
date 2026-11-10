@@ -4,13 +4,13 @@
 const fs = require('fs'), path = require('path'), os = require('os'), readline = require('readline');
 const { spawnSync } = require('child_process');
 const RIVE = process.env.RIVE_BIN || path.join(os.homedir(), '.rive', 'bin', 'rive');
-const CONFIG = path.join(__dirname, 'config.json');
+const CONFIG = path.join(__dirname, '..', 'config.json');
 const strip = s => String(s).replace(/\x1b\[[0-9;]*m/g, '');
 const rive = (args, inherit) => { const r = spawnSync(RIVE, args, inherit ? { stdio: 'inherit' } : { encoding: 'utf8' }); return strip((r.stdout || '') + '\n' + (r.stderr || '')); };
 const ask = q => new Promise(res => { const rl = readline.createInterface({ input: process.stdin, output: process.stdout }); rl.question(q, a => { rl.close(); res(a.trim()); }); });
 
 (async () => {
-  if (!fs.existsSync(RIVE)) { console.log('The Rive CLI is not installed. Run ./setup.sh first.'); return; }
+  if (!fs.existsSync(RIVE)) { console.log('The Rive CLI is not installed. Run ./scripts/setup.sh first.'); return; }
   const signedIn = () => !/not logged in/i.test(rive(['whoami']).split('\n').filter(l => !/is available/i.test(l))[0] || 'Not logged in');
   if (!signedIn()) {
     console.log('You are not signed in to Rive. Opening the sign-in now (it uses your browser)...');

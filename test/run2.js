@@ -1,6 +1,6 @@
 // node run2.js <outDir> [layout]  -> converts sample2 (all effects) and writes a ready-to-verify project
 const fs = require('fs'), path = require('path');
-const { convert } = require('../convert.js');
+const { convert } = require('../plugin/convert.js');
 const out = process.argv[2], mode = process.argv[3] === 'layout' ? 'layout' : 'artboard';
 const S = (r, g, b, a) => ({ type: 'SOLID', color: { r, g, b, a: a === undefined ? 1 : a } });
 const rt = (x, y, deg) => { const t = -deg * Math.PI / 180, c = Math.cos(t), s = Math.sin(t); return [[c, -s, x], [s, c, y]]; }; // figma matrix: rotation about top-left

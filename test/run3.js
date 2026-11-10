@@ -1,6 +1,6 @@
 // node run3.js <outDir>  -> exact-size stroke test: sizes must match Figma pixel for pixel
 const fs = require('fs'), path = require('path');
-const { convert } = require('../convert.js');
+const { convert } = require('../plugin/convert.js');
 const out = process.argv[2];
 const S = (r, g, b, a) => ({ type: 'SOLID', color: { r, g, b, a: a === undefined ? 1 : a } });
 const sh = (id, name, type, x, y, w, h, extra) => Object.assign({ id, name, type, x, y, width: w, height: h, fills: [S(1, 0.85, 0.4)], layoutSizingHorizontal: 'FIXED', layoutSizingVertical: 'FIXED' }, extra || {});

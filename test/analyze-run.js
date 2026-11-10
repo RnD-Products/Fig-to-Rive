@@ -1,5 +1,5 @@
 // node analyze-run.js <snapshot.json>  -> prints the design analysis
-const { analyze } = require('../analyze.js');
+const { analyze } = require('../plugin/analyze.js');
 const snap = JSON.parse(require('fs').readFileSync(process.argv[2], 'utf8'));
 const r = analyze(snap, {});
 console.log(r.verdict, '| score', r.score, '|', JSON.stringify(r.counts), '|', JSON.stringify(r.stats));
