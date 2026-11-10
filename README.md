@@ -1,4 +1,19 @@
-# Figma to Rive: layout + live text
+# Fig To Rive
+
+A Figma plugin plus a small local helper that turns Figma frames into Rive files, keeping auto layout and live text,
+and can add Webflow-safe layout and one-command animation.
+
+## Quick start
+1. `./scripts/setup.sh` checks Node.js, the Rive CLI and your Rive login.
+2. Double-click `Start Helper.command`, leave it open, and note the token it prints.
+3. In Figma: Plugins -> Development -> Import plugin from manifest -> `plugin/manifest.json`. Click the gear, paste the token.
+4. Select a frame -> **Send to Rive**. Optional: tick **Safe layout** (Webflow), then double-click `Animate.command` with the Rive file link.
+
+Guides: [docs/SETUP-NEW-COMPUTER.md](docs/SETUP-NEW-COMPUTER.md), [docs/START-HELPER.md](docs/START-HELPER.md),
+[docs/HOWTO-ANIMATE-AND-WEBFLOW.md](docs/HOWTO-ANIMATE-AND-WEBFLOW.md).
+
+**This repo is only the tool.** Exports go to `../Exports/` (a folder next to this one; change it with `exportsDir` in
+`config.json`) and `animate.sh` writes kits to `../Projects/`. Both are created on first use and are not part of this repo.
 
 ## Folder map
 ```
