@@ -1,0 +1,14 @@
+{
+  "name": "Figma To Rive",
+  "id": "figma-to-rive-layout-text-local",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "dist/ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"],
+    "devAllowedDomains": ["http://localhost:4747"],
+    "reasoning": "Optional local helper (serve.js on your own machine) that verifies the export with the Rive CLI and pushes it when you click Push."
+  }
+}

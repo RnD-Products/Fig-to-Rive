@@ -1,0 +1,2264 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  :root { color-scheme: dark; --bg:#1e1e1e; --panel:#2a2a2a; --panel2:#262626; --line:#3d3d3d; --text:#e8e8e8; --muted:#9b9b9b; --accent:#0d99ff;
+    --code:#383838; --err:#f87171; --warn:#fbbf24; --ok:#4ade80; --info:#60a5fa; --fixbg:#12372a; --fixfg:#86efac; --chip:#27304d; --chipline:#3b4a7a; --chiptext:#c7d2fe; }
+  html, body { background: var(--bg); }
+  body { font: 12px/1.5 Inter, system-ui, sans-serif; margin: 0; padding: 0 16px 20px; color: var(--text); }
+  h1 { font-size: 14px; margin: 0 0 4px; }
+  p { margin: 0 0 12px; color: var(--muted); }
+  p b, p code { color: var(--text); }
+  a { color: var(--accent); }
+  button { font: inherit; font-weight: 500; padding: 8px 14px; border-radius: 6px; border: 0; background: var(--accent); color: #fff; cursor: pointer; margin-right: 6px; transition: filter .12s, background .12s; }
+  button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button:hover { filter: brightness(1.1); }
+  button.alt { background: #3a3a3a; color: var(--text); }
+  button[disabled] { opacity: .4; cursor: not-allowed; filter: none; }
+  input { font: inherit; width: 100%; box-sizing: border-box; padding: 7px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel2); color: var(--text); outline: none; }
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: #6f6f6f; }
+  .box { margin-top: 12px; padding: 10px; border-radius: 6px; background: var(--panel); color: var(--text); }
+  /* colour only as a thin marker, never as text */
+  .box.ok { border-left: 3px solid var(--ok); } .box.warn { border-left: 3px solid var(--warn); } .box.bad { border-left: 3px solid var(--err); } .box.info { border-left: 3px solid var(--info); }
+  .box.warn li, .box.info li { color: #cfcfcf; }
+  code { background: var(--code); color: var(--text); padding: 1px 4px; border-radius: 3px; }
+  ul { margin: 4px 0 0 16px; padding: 0; } pre { white-space: pre-wrap; margin: 6px 0 0; font-size: 11px; max-height: 120px; overflow: auto; color: var(--text); }
+  label { display: block; margin: 8px 0 4px; color: var(--muted); }
+  label.chk { display: flex; gap: 8px; align-items: flex-start; color: var(--text); margin: 6px 0; }
+  label.chk input { width: auto; margin-top: 2px; accent-color: var(--accent); }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 0 -16px 14px; padding: 6px 16px 0; position: sticky; top: 0; background: var(--bg); z-index: 5; }
+  .tab { background: none; color: var(--muted); border-radius: 6px 6px 0 0; padding: 8px 12px; margin: 0; }
+  .tab:hover { color: var(--text); filter: none; }
+  .tab.on { color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); font-weight: 600; }
+  .score { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; background: var(--panel); }
+  .score b.n { font-size: 26px; line-height: 1; color: var(--text); }
+  .pill { display: inline-block; padding: 1px 8px 1px 6px; border-radius: 10px; font-size: 11px; margin-right: 4px; color: #cfcfcf; background: #363636; }
+  .pill::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+  .pill.error::before { background: #ef4444; } .pill.warning::before { background: #f59e0b; } .pill.info::before { background: #3b82f6; }
+  .issue { border: 1px solid var(--line); background: var(--panel2); border-radius: 8px; padding: 10px; margin-top: 8px; }
+  .issue.error { border-left: 4px solid #ef4444; } .issue.warning { border-left: 4px solid #f59e0b; } .issue.info { border-left: 4px solid #3b82f6; }
+  .issue h3 { font-size: 12px; margin: 0 0 4px; color: var(--text); }
+  .issue .fix { margin-top: 6px; padding: 6px 8px; background: #323232; border-radius: 6px; color: var(--text); }
+  .issue .why { color: #b5b5b5; }
+  button.sm { padding: 3px 8px; font-size: 11px; margin: 6px 6px 0 0; }
+  .muted { color: var(--muted); }
+  .layers { margin-top: 8px; }
+  .layers .row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .chip { background: #333; color: #ddd; border: 1px solid #4a4a4a; border-radius: 12px; padding: 2px 9px; font-size: 11px; margin: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chip:hover { background: #3f3f3f; } .chip.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .linkbtn { background: none; color: var(--accent); padding: 2px 4px; margin: 4px 0 0; font-size: 11px; }
+  .more[hidden] { display: none; }
+  .tabs .gear { margin: 0 0 0 auto; padding: 6px 8px; background: none; color: var(--muted); font-size: 16px; line-height: 1; border-radius: 6px; }
+  .tabs .gear:hover, .tabs .gear.on { color: var(--accent); filter: none; }
+  #settings { margin: 0 0 12px; padding: 10px; border-radius: 8px; background: var(--panel); }
+  #settings[hidden] { display: none; }
+  #settings label { margin-top: 0; }
+  #tokenNote { margin-top: 6px; min-height: 14px; }
+  .sec { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 16px 0 6px; }
+  .field { margin-bottom: 2px; } .field label { margin: 0 0 4px; } .hint { margin: 4px 0 0; font-size: 11px; color: var(--muted); }
+  details.opts { margin-top: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel2); }
+  details.opts summary { cursor: pointer; padding: 9px 10px; color: var(--text); font-weight: 500; list-style: none; display: flex; align-items: center; gap: 6px; }
+  details.opts summary::-webkit-details-marker { display: none; }
+  details.opts summary::before { content: '\25B8'; color: var(--muted); transition: transform .12s; }
+  details.opts[open] summary::before { transform: rotate(90deg); }
+  details.opts .body { padding: 0 10px 6px; border-top: 1px solid var(--line); }
+  .actions { display: flex; gap: 8px; margin-top: 16px; } .actions button { margin: 0; flex: 1; padding: 10px 14px; } .actions button.alt { flex: 0 0 auto; }
+  input:disabled { opacity: .5; }
+  select { font: inherit; width: 100%; box-sizing: border-box; padding: 7px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel2); color: var(--text); outline: none; }
+  select:focus { border-color: var(--accent); }
+  .recent { border: 1px solid var(--line); background: var(--panel2); border-radius: 8px; padding: 8px 10px; margin-top: 6px; }
+  .recent .rtop { display: flex; justify-content: space-between; gap: 8px; } .recent .rtop b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rhead { display: flex; align-items: center; justify-content: space-between; }
+  .iconbtn { margin: 0; padding: 3px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; background: none; color: var(--muted); border-radius: 6px; }
+  .iconbtn:hover { color: var(--text); background: #333; filter: none; }
+  .iconbtn.spin svg { animation: spin .8s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }
+  .recent { position: relative; }
+  .recent .trash { position: absolute; right: 6px; bottom: 6px; margin: 0; padding: 4px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: none; color: var(--muted); border-radius: 6px; opacity: 0; transition: opacity .12s, color .12s, background .12s; }
+  .recent:hover .trash, .recent .trash:focus-visible { opacity: 1; } .recent .trash:hover { color: var(--err); background: #3a3a3a; filter: none; }
+  .rtabs { display: flex; gap: 4px; padding: 2px; border-radius: 8px; background: var(--panel); width: fit-content; }
+  .rtab { margin: 0; padding: 4px 12px; border-radius: 6px; background: none; color: var(--muted); font-size: 11px; } .rtab:hover { color: var(--text); filter: none; } .rtab.on { background: #3a3a3a; color: var(--text); }
+  .recent .rbtns { padding-right: 28px; }
+  .recent .rbtns { display: flex; gap: 6px; flex-wrap: wrap; } .recent .rbtns button { margin: 6px 0 0; } .recent a { text-decoration: none; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #6b6b6b; align-self: center; margin-left: auto; margin-right: 2px; flex: none; }
+  .dot + .gear { margin-left: 0; }
+  .dot.ok { background: var(--ok); } .dot.bad { background: var(--err); } .dot.off { background: #6b6b6b; }
+  .score b.n { min-width: 44px; text-align: center; }
+  .score .sub { margin-top: 4px; }
+  .issue { padding: 0; }
+  .ihead { display: flex; align-items: center; gap: 8px; width: 100%; margin: 0; padding: 10px; background: none; color: var(--text); text-align: left; border-radius: 8px; font-weight: 600; }
+  .ihead:hover { background: #2f2f2f; filter: none; }
+  .ihead .ititle { flex: 1; min-width: 0; }
+  .ihead .chev { width: 7px; height: 7px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(-45deg); transition: transform .12s; flex: none; margin-right: 2px; }
+  .cardbody { padding: 10px; }
+  .issue.open .chev { transform: rotate(45deg); }
+  .ibody { padding: 0 10px 10px; } .ibody[hidden] { display: none; }
+  .issue .why { margin-top: 2px; }
+  .head-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; } .head-actions button { margin: 0; }
+  .group-title { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 18px 0 0; }
+  .empty { padding: 14px; border-radius: 8px; background: var(--panel); text-align: center; color: var(--text); margin-top: 12px; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; } ::-webkit-scrollbar-thumb { background: #444; border-radius: 5px; border: 2px solid var(--bg); } ::-webkit-scrollbar-track { background: var(--bg); }
+</style>
+<div class="tabs">
+  <button class="tab on" id="tabImport">Import</button>
+  <button class="tab" id="tabAnalysis">Design analysis</button>
+  <button class="tab" id="tabClean">Clean</button>
+  <span class="dot off" id="dot" title="Helper: checking"></span>
+  <button class="gear" id="gear" title="Settings" aria-label="Settings">&#9881;</button>
+</div>
+<div id="settings" hidden>
+  <label for="token">Helper token</label>
+  <input id="token" placeholder="Paste, then press Enter" autocomplete="off" spellcheck="false">
+  <div class="muted" id="tokenNote"></div>
+  <div class="muted" id="helperState" style="margin-top:6px"></div>
+</div>
+<div id="paneClean" hidden>
+  <div class="muted" id="cleanSel" style="margin-bottom:8px">Select layers or frames to clean.</div>
+  <div class="issue info"><div class="cardbody">
+    <div class="sec" style="margin-top:0">Names</div>
+    <label class="chk"><input type="checkbox" id="cnSpaces" checked><span>Trim and collapse extra spaces</span></label>
+    <label class="chk"><input type="checkbox" id="cnSymbols" checked><span>Remove emoji and hidden characters</span></label>
+    <label class="chk" title='Turns names like "Frame 2147230678" or "Vector 9323" into "Frame" or "Vector".'><input type="checkbox" id="cnGeneric" checked><span>Simplify default names (Frame 123 &rarr; Frame)</span></label>
+    <div class="muted" id="cnInfo" style="margin:6px 0 8px"></div>
+    <button id="cnApply">Clean names</button>
+  </div></div>
+  <div class="issue info" style="margin-top:12px"><div class="cardbody">
+    <div class="sec" style="margin-top:0">Pixels</div>
+    <label class="chk" title="Rounds x and y to whole numbers. Skips rotated and flipped layers and layers placed by auto layout."><input type="checkbox" id="cpPos" checked><span>Snap positions to whole pixels</span></label>
+    <label class="chk" title="Rounds width and height. Skips text, lines, and sizes set to hug or fill."><input type="checkbox" id="cpSize" checked><span>Snap sizes to whole pixels</span></label>
+    <div class="muted" id="cpInfo" style="margin:6px 0 8px"></div>
+    <button id="cpApply">Snap to pixels</button>
+  </div></div>
+  <div class="issue info" style="margin-top:12px"><div class="cardbody">
+    <div class="sec" style="margin-top:0">Hidden</div>
+    <label class="chk" title="Deletes layers whose eye is switched off. They are not imported into Rive anyway. Layers inside instances are skipped."><input type="checkbox" id="chLayers" checked><span>Delete hidden layers</span></label>
+    <label class="chk" title="Removes fills, strokes, shadows and blurs that are switched off or at 0% opacity."><input type="checkbox" id="chPaints" checked><span>Remove hidden fills, strokes and effects</span></label>
+    <div class="muted" id="chInfo" style="margin:6px 0 8px"></div>
+    <button id="chApply">Remove hidden</button>
+  </div></div>
+  <label class="chk" style="margin-top:12px"><input type="checkbox" id="cDeep" checked><span>Include everything inside the selection</span></label>
+  <div id="cleanOut"></div>
+</div>
+<div id="paneAnalysis" hidden>
+  <div class="head-actions"><button id="runAnalysis">Analyse selection</button><button id="sendClaude" class="alt" title="Saves the report, previews and design data in the helper's claude-inbox folder">Send to Claude</button>
+  <span class="muted" id="selInfo"></span></div>
+  <div id="analysisOut"></div>
+</div>
+<div id="paneImport">
+<div class="box" id="detected" style="margin-top:0">Select a frame to begin.</div>
+
+<div class="sec">File name</div>
+<input id="projname" placeholder="From the selected frame">
+
+<div class="sec">Destination</div>
+<div class="rtabs" id="destTabs"><button class="rtab on" data-dest="account">My account</button><button class="rtab" data-dest="open">Open Rive file</button></div>
+<div class="field" id="linkWrap" hidden style="margin-top:8px">
+  <input id="filelink" placeholder="Paste the file's link or id" aria-label="Open Rive file link">
+</div>
+<div class="field" id="addWrap" hidden style="margin-top:8px"><select id="addTo" aria-label="Add to project"></select></div>
+<div class="hint" id="destHint"></div>
+
+<details class="opts">
+  <summary>Options</summary>
+  <div class="body">
+    <label class="chk" title="Size, fill and layout of the frame become the artboard's. Off: the frame is a layout box inside a plain artboard."><input type="checkbox" id="optArtboard" checked><span>Frame becomes the artboard</span></label>
+    <label class="chk" title="Each main component becomes its own Rive component artboard."><input type="checkbox" id="optComp" checked><span>Components as artboards</span></label>
+    <label class="chk" title="Instances become live nested artboards of their component. Needs Components on. Off: plain layout."><input type="checkbox" id="optLink" checked><span>Link instances to components</span></label>
+    <label class="chk" title="Inner shadows also cover the layers inside, like Figma."><input type="checkbox" id="optInner" checked><span>Inner shadows over contents</span></label>
+    <label class="chk" title="Rewrites the layout so the file draws the same in the runtime you pick below, not only in the Rive editor. Off: the normal Rive output."><input type="checkbox" id="optSafe"><span>Safe layout</span></label>
+    <div id="safeTargets" style="display:none;margin:2px 0 6px 22px;font-size:11px;color:var(--muted,#888)">
+      <label style="margin-right:12px" title="Rive element in Webflow (runtime 2.35): no layout boxes in Nodes, rotations and flips baked into shapes, fixed text boxes, no hue or additive blends."><input type="radio" name="safeTarget" id="tgtWebflow" value="webflow" checked> Webflow</label>
+      <label style="opacity:.5;cursor:not-allowed" title="Locked: Framer is not supported yet."><input type="radio" name="safeTarget" id="tgtFramer" value="framer" disabled> Framer &#128274;</label>
+    </div>
+    <label class="chk" title="Open Rive file only. The old artboard is swapped for the new one, even after a rename. Edits you made to it in Rive are lost (a backup is saved). Off: saves a new artboard."><input type="checkbox" id="optReplace" checked><span>Update replaces the artboard</span></label>
+    <label class="chk" title="Pushes as soon as the export verifies. Updates still wait for you."><input type="checkbox" id="optAuto"><span>Push automatically</span></label>
+  </div>
+</details>
+
+<div class="actions">
+  <button id="send">Send to Rive</button><button id="zip" class="alt" title="Download the converted files without the helper">Zip</button>
+</div>
+
+<div id="out"></div>
+<div id="recents"></div>
+</div>
+<script>/* Figma snapshot -> Rive RML.
+ *
+ * Pure function, no Figma API: it takes the plain-JSON snapshot that code.js
+ * extracts, so the same file runs inside the plugin UI and in Node for tests.
+ *
+ * The two rules this plugin exists for:
+ *   1. Auto layout is never flattened. An auto layout frame becomes a
+ *      LayoutComponent (+ LayoutComponentStyle); children that sit in the flow
+ *      get a LayoutParticipant. Gap, padding, alignment, wrap, hug/fill/fixed and
+ *      absolute positioning all carry over as layout properties.
+ *   2. Text is never outlined. A TEXT node always becomes Text + TextStylePaint +
+ *      TextValueRun, and the font it needs is reported, never baked into paths.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.FigmaToRive = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  // Figma keeps the layers inside a group positioned relative to the group's PARENT frame, not to the group.
+  // Rive groups are their own space, so move each group's children into group-local coordinates first.
+  function mulT(A, B) {
+    return [[A[0][0] * B[0][0] + A[0][1] * B[1][0], A[0][0] * B[0][1] + A[0][1] * B[1][1], A[0][0] * B[0][2] + A[0][1] * B[1][2] + A[0][2]],
+      [A[1][0] * B[0][0] + A[1][1] * B[1][0], A[1][0] * B[0][1] + A[1][1] * B[1][1], A[1][0] * B[0][2] + A[1][1] * B[1][2] + A[1][2]]];
+  }
+  function invT(T) {
+    var a = T[0][0], c = T[0][1], tx = T[0][2], b = T[1][0], d = T[1][1], ty = T[1][2], det = a * d - c * b;
+    if (Math.abs(det) < 1e-9) return null;
+    return [[d / det, -c / det, (c * ty - d * tx) / det], [-b / det, a / det, (b * tx - a * ty) / det]];
+  }
+  function rebaseGroups(node) {
+    var T = node.relativeTransform, out = Object.assign({}, node);
+    if (node.children) {
+      out.children = node.children.map(function (c) {
+        var cT = c.relativeTransform, kid = rebaseGroups(c), inv = (node.type === 'GROUP' && T && cT) ? invT(T) : null;
+        if (inv) { var m = mulT(inv, cT); kid.relativeTransform = m; kid.x = m[0][2]; kid.y = m[1][2]; }
+        return kid;
+      });
+    }
+    return out;
+  }
+
+  function convert(snapshot, options) {
+    snapshot = Object.assign({}, snapshot, { nodes: (snapshot.nodes || []).map(rebaseGroups), components: (snapshot.components || []).map(rebaseGroups) });
+    options = options || {};
+    var warnings = [];
+    var fonts = {}; // key -> {family, style, file, assetId}
+    var nextId = 100;
+    var fontAssetIds = {};
+    var imageAssets = {};   // hash -> {file, id, hash, ext}
+    var notes = [];
+    var detached = 0;
+    var seenWarn = {};
+    var frameAsLayout = options.frameMode === 'layout';
+    var componentArtboards = options.componentArtboards !== false;
+
+    function id() { return '0:' + nextId++; }
+    function warn(node, msg) {
+      var k = msg + '|' + (node && node.type);
+      var line = (node ? '"' + node.name + '" (' + node.type + '): ' : '') + msg;
+      if (seenWarn[line]) return;
+      seenWarn[line] = true;
+      warnings.push(line);
+    }
+    function esc(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/\r?\n/g, '&#10;');
+    }
+    function num(v) { return String(Math.round(v * 1000) / 1000); }
+    function attr(name, v) { return v === undefined || v === null ? '' : ' ' + name + '="' + esc(v) + '"'; }
+
+    // ---- colour -------------------------------------------------------
+    function hex2(v) { var s = Math.max(0, Math.min(255, Math.round(v * 255))).toString(16); return s.length < 2 ? '0' + s : s; }
+    function colorHex(c, opacity) {
+      var a = (c.a === undefined ? 1 : c.a) * (opacity === undefined ? 1 : opacity);
+      return (hex2(a) + hex2(c.r) + hex2(c.g) + hex2(c.b)).toUpperCase();
+    }
+
+    // ---- paint --------------------------------------------------------
+    function invert(t) { // 2x3 affine [[a,c,e],[b,d,f]]
+      var a = t[0][0], c = t[0][1], e = t[0][2], b = t[1][0], d = t[1][1], f = t[1][2];
+      var det = a * d - b * c;
+      if (!det) return [[1, 0, 0], [0, 1, 0]];
+      return [[d / det, -c / det, (c * f - d * e) / det], [-b / det, a / det, (b * e - a * f) / det]];
+    }
+    function apply(t, x, y) { return [t[0][0] * x + t[0][1] * y + t[0][2], t[1][0] * x + t[1][1] * y + t[1][2]]; }
+
+    // centered: the paint belongs to a Shape, whose local origin is its centre. A layout box (and the artboard) measures from its top-left.
+    function paintBody(paint, node, w, h, extraOpacity, centered) {
+      var gx = centered ? w / 2 : 0, gy = centered ? h / 2 : 0;
+      var op = (paint.opacity === undefined ? 1 : paint.opacity) * (extraOpacity === undefined ? 1 : extraOpacity);
+      if (paint.type === 'SOLID') {
+        return '<SolidColor colorValue="' + colorHex(paint.color, op) + '" name="Color"/>';
+      }
+      if (paint.type === 'GRADIENT_LINEAR' && paint.gradientTransform && paint.gradientStops) {
+        var inv = invert(paint.gradientTransform);
+        var s = apply(inv, 0, 0.5), e = apply(inv, 1, 0.5);
+        var stops = paint.gradientStops.map(function (st) {
+          return '<GradientStop colorValue="' + colorHex(st.color, op) + '" position="' + num(st.position) + '"/>';
+        }).join('');
+        return '<LinearGradient startX="' + num(s[0] * w - gx) + '" startY="' + num(s[1] * h - gy) + '" endX="' + num(e[0] * w - gx) +
+          '" endY="' + num(e[1] * h - gy) + '" name="Gradient">' + stops + '</LinearGradient>';
+      }
+      if (paint.type === 'GRADIENT_RADIAL' && paint.gradientTransform && paint.gradientStops) {
+        // Figma's gradient space has the centre at (0.5,0.5) and the radius running to (1,0.5).
+        var invR = invert(paint.gradientTransform);
+        var c0 = apply(invR, 0.5, 0.5), c1 = apply(invR, 1, 0.5), c2 = apply(invR, 0.5, 1);
+        var rx = Math.hypot((c1[0] - c0[0]) * w, (c1[1] - c0[1]) * h), ry = Math.hypot((c2[0] - c0[0]) * w, (c2[1] - c0[1]) * h);
+        if (Math.abs(rx - ry) > Math.max(rx, ry) * 0.12) warn(node, 'elliptical radial gradient imported as a circular one');
+        var rstops = paint.gradientStops.map(function (st) {
+          return '<GradientStop colorValue="' + colorHex(st.color, op) + '" position="' + num(st.position) + '"/>';
+        }).join('');
+        var cx0 = c0[0] * w - gx, cy0 = c0[1] * h - gy;
+        // Rive's radial gradient is a circle. For an elliptical one, pick the circle that best matches the ellipse over the area the shape covers.
+        var rrad = (rx + ry) / 2;
+        if (options.ellipseRadial !== 'average' && Math.abs(rx - ry) > Math.max(rx, ry) * 0.12) {
+          var Ax = (c1[0] - c0[0]) * w, Ay = (c1[1] - c0[1]) * h, Bx = (c2[0] - c0[0]) * w, By = (c2[1] - c0[1]) * h, det = Ax * By - Ay * Bx;
+          if (Math.abs(det) > 1e-6) {
+            var pts = [], gi, gj;
+            for (gj = 0; gj < 8; gj++) for (gi = 0; gi < 16; gi++) {
+              var px = ((gi + 0.5) / 16) * w - cx0 - gx, py = ((gj + 0.5) / 8) * h - cy0 - gy;
+              if (!centered) { px = ((gi + 0.5) / 16) * w - cx0; py = ((gj + 0.5) / 8) * h - cy0; }
+              var uu = (px * By - py * Bx) / det, vv = (Ax * py - Ay * px) / det;
+              pts.push([Math.min(1, Math.hypot(uu, vv)), Math.hypot(px, py)]);
+            }
+            var best = rrad, bestErr = Infinity, R, k;
+            for (R = Math.min(rx, ry) * 0.5; R <= Math.max(rx, ry) * 1.2; R += Math.max(0.5, Math.min(rx, ry) / 60)) {
+              var err = 0; for (k = 0; k < pts.length; k++) { var d = pts[k][0] - Math.min(1, pts[k][1] / R); err += d * d; }
+              if (err < bestErr) { bestErr = err; best = R; }
+            }
+            rrad = best;
+          }
+        }
+        return '<RadialGradient startX="' + num(cx0) + '" startY="' + num(cy0) + '" endX="' + num(cx0 + rrad) + '" endY="' + num(cy0) +
+          '" name="Gradient">' + rstops + '</RadialGradient>';
+      }
+      if (paint.type.indexOf('GRADIENT') === 0) {
+        warn(node, paint.type + ' fill is not converted yet; using its first stop as a solid colour');
+        var st0 = paint.gradientStops && paint.gradientStops[0];
+        return st0 ? '<SolidColor colorValue="' + colorHex(st0.color, op) + '" name="Color"/>' : null;
+      }
+      return null; // IMAGE paints are placed as Image drawables, not as a paint
+    }
+    function visiblePaints(list) {
+      return (list || []).filter(function (p) { return p.visible !== false && p.opacity !== 0; });
+    }
+    function findImage(node) {
+      var imgs = visiblePaints(node.fills).filter(function (p) { return p.type === 'IMAGE'; });
+      return imgs.length ? imgs[imgs.length - 1] : null;
+    }
+    // Plain fills only (artboard background).
+    function plainFills(node, w, h) {
+      return visiblePaints(node.fills).filter(function (p) { return p.type !== 'IMAGE'; }).map(function (p) {
+        var body = paintBody(p, node, w, h);
+        return body ? '<Fill' + paintBlend(p, node) + ' name="Fill">' + body + '</Fill>' : '';
+      }).join('');
+    }
+
+    // All the paints of one shape / layout box, in Rive's draw order (later paints draw on top):
+    //   drop shadows (feathered fills) -> outside stroke -> fills -> inner shadows -> strokes
+    // Shadows and layer blur use Feather; INSIDE strokes are a 2x stroke the caller clips to the shape.
+    function paintsXml(node, w, h, o) {
+      o = o || {};
+      var fx = (node.effects || []).filter(function (e) { return e.visible !== false; });
+      var drops = fx.filter(function (e) { return e.type === 'DROP_SHADOW'; });
+      var inners = fx.filter(function (e) { return e.type === 'INNER_SHADOW'; });
+      var blur = fx.filter(function (e) { return e.type === 'LAYER_BLUR'; })[0];
+      if (fx.some(function (e) { return e.type === 'BACKGROUND_BLUR'; })) warn(node, 'background blur is not supported');
+      var fills = o.lineOnly ? [] : visiblePaints(node.fills).filter(function (p) { return p.type !== 'IMAGE'; });
+      var strokes = visiblePaints(node.strokes);
+      var sw = typeof node.strokeWeight === 'number' ? node.strokeWeight : 0;
+      var hasStroke = strokes.length && sw > 0;
+      var surface = fills.length || hasStroke || o.hasImage;
+      var blurFx = blur ? '<Feather strength="' + num(blur.radius) + '" name="Feather"/>' : '';
+      if (blur && o.hasChildren) warn(node, 'layer blur only blurs this box\'s own paint, not the things inside it');
+
+      function featherFill(e, inner) {
+        if (e.spread && !(o.splitShadow && !o.flowShadow && !inner)) warn(node, 'shadow spread is ignored');
+        // An inner shadow cannot spread further than the shape is wide; huge blur values (Figma allows them) would just wash
+        // everything out when drawn over the contents, so the strength is capped relative to the shape's smaller side.
+        var strength = e.radius;
+        if (inner && o.splitInner) strength = Math.min(e.radius * (options.innerShadowScale || 1), (options.innerShadowCap || 0.7) * Math.min(w, h));
+        return '<Fill fillRule="clockwise"' + (options.effectBlendModes === false ? '' : paintBlend(e, node)) + ' name="' + (inner ? 'Inner Shadow' : 'Shadow') + '"><SolidColor colorValue="' + colorHex(e.color) +
+          '" name="Color"/><Feather strength="' + num(strength) + '" offsetX="' + num(e.offset ? e.offset.x : 0) + '" offsetY="' +
+          num(e.offset ? e.offset.y : 0) + '"' + (inner ? ' inner="true"' : '') + ' name="Feather"/></Fill>';
+      }
+      var dashFx = '';
+      // Figma's dash lengths are the VISIBLE lengths, round ends included. Rive's round caps add half the stroke width to each end of a dash,
+      // so shorten the dashes and lengthen the gaps by the stroke width to look the same.
+      function buildDash(round) {
+        var dp = node.dashPattern.length % 2 ? node.dashPattern.concat(node.dashPattern) : node.dashPattern, sw0 = node.strokeWeight || 1;
+        return '<DashPath name="Dashes">' + dp.map(function (d, i) {
+          var v = round ? (i % 2 ? d + sw0 : Math.max(0.05, d - sw0)) : d;
+          return '<Dash length="' + num(v) + '" name="' + (i % 2 ? 'Gap' : 'Dash') + '"/>';
+        }).join('') + '</DashPath>';
+      }
+      if (node.dashPattern && node.dashPattern.length) dashFx = buildDash(false);
+      // Stroke ends and corners follow Figma. Old snapshots do not carry them: keep the previous round look, except for
+      // dashed strokes where round ends would swallow the gaps.
+      var CAP = { NONE: 'butt', ROUND: 'round', SQUARE: 'square' }, JOIN = { MITER: 'miter', ROUND: 'round', BEVEL: 'bevel' };
+      // A dashed line whose ends carry caps (dots, arrows) has round dash ends in Figma, like a line whose cap is Round.
+      var dashRound = dashFx && !node.strokeCap && node.endCaps && node.endCaps.length;
+      var capV = CAP[node.strokeCap] || (dashRound ? 'round' : (dashFx ? 'butt' : 'round')), joinV = JOIN[node.strokeJoin] || (o.forceCenter ? 'miter' : 'round');
+      if (dashFx && capV === 'round') dashFx = buildDash(true);
+      if (node.strokeCap && !CAP[node.strokeCap] && node.strokeCap !== 'ARROW_LINES') warn(node, 'stroke end "' + node.strokeCap + '" (arrows) is drawn as a plain end');
+      // Rive has no angular (sweep) gradient. On a ring, draw it as many short arcs, each in the colour the sweep has there.
+      function angularStrokes(p, thickness) {
+        var inv = invert(p.gradientTransform), c0 = apply(inv, 0.5, 0.5), cx = apply(inv, 1, 0.5), cy = apply(inv, 0.5, 1);
+        var xd = [(cx[0] - c0[0]) * w, (cx[1] - c0[1]) * h], yd = [(cy[0] - c0[0]) * w, (cy[1] - c0[1]) * h];
+        var a0 = Math.atan2(xd[1], xd[0]), dir = (xd[0] * yd[1] - xd[1] * yd[0]) >= 0 ? 1 : -1;
+        var stops = p.gradientStops.slice().sort(function (a, b) { return a.position - b.position; });
+        function at(t) {
+          var lo = stops[0], hi = stops[stops.length - 1], i;
+          for (i = 0; i < stops.length - 1; i++) if (t >= stops[i].position && t <= stops[i + 1].position) { lo = stops[i]; hi = stops[i + 1]; break; }
+          var span = hi.position - lo.position, f = span > 1e-9 ? Math.min(1, Math.max(0, (t - lo.position) / span)) : 0;
+          if (t <= stops[0].position) return stops[0].color; if (t >= stops[stops.length - 1].position) return stops[stops.length - 1].color;
+          var m = function (k) { return (lo.color[k] === undefined ? 1 : lo.color[k]) * (1 - f) + (hi.color[k] === undefined ? 1 : hi.color[k]) * f; };
+          return { r: m('r'), g: m('g'), b: m('b'), a: m('a') };
+        }
+        var N = 48, out = '', op = p.opacity === undefined ? 1 : p.opacity;
+        for (var i = 0; i < N; i++) {
+          var t0 = i / N, t1 = (i + 1) / N, col = at((t0 + t1) / 2);
+          if ((col.a === undefined ? 1 : col.a) * op < 0.01) continue;
+          // where this slice sits on Rive's ring, which starts at the top and runs clockwise (0..1 of the way round)
+          var u = (((a0 + dir * 2 * Math.PI * (dir > 0 ? t0 : t1) + Math.PI / 2) / (2 * Math.PI)) % 1 + 1) % 1;
+          out += '<Stroke thickness="' + num(thickness) + '" cap="butt" join="' + (JOIN[node.strokeJoin] || 'miter') + '" name="Stroke">' +
+            '<SolidColor colorValue="' + colorHex(col, op) + '" name="Color"/>' + dashFx +
+            '<TrimPath start="0" end="' + num(1 / N + 0.0008) + '" offset="' + num(u) + '" modeValue="1" name="Arc"/></Stroke>';
+        }
+        return out;
+      }
+      // Frosted-glass cards: Figma draws their gradient border (one that fades to a transparent white) as a clear, near-white line all the way
+      // round, whatever the stop alphas and paint opacity say. Measured on two real designs: about 85% white. Match that.
+      var glassBlur = (node.effects || []).some(function (e) { return e.visible !== false && e.type === 'BACKGROUND_BLUR'; });
+      function glassBorder(p) {
+        if (!glassBlur || p.type !== 'GRADIENT_LINEAR' || !p.gradientStops || !p.gradientStops.some(function (g) { return (g.color.a === undefined ? 1 : g.color.a) < 0.05; })) return p;
+        return { type: 'SOLID', visible: true, opacity: 1, color: { r: 1, g: 1, b: 1, a: 0.85 } };
+      }
+      function strokesAt(thickness) {
+        return strokes.map(function (p0) {
+          var p = glassBorder(p0);
+          if (options.angularRings === 'strokes' && p.type === 'GRADIENT_ANGULAR' && node.type === 'ELLIPSE' && p.gradientTransform && p.gradientStops && p.gradientStops.length) return angularStrokes(p, thickness);
+          var body = paintBody(p, node, w, h, undefined, o.centered);
+          return body ? '<Stroke thickness="' + num(thickness) + '" cap="' + capV + '" join="' + joinV + '"' + paintBlend(p, node) + ' name="Stroke">' + body + dashFx + blurFx + (node.__arc ? '<TrimPath start="0" end="' + num(node.__arc.len) + '" offset="' + num(node.__arc.offset) + '" modeValue="1" name="Arc"/>' : '') + '</Stroke>' : '';
+        }).join('');
+      }
+
+      var out = '', shadowed = false, clip = false, tail = '', shadowOut = '', shadowBoxes = '', innerOut = '';
+      if (surface) drops.forEach(function (e) {
+        var f = featherFill(e, false);
+        if (o.splitShadow && !o.flowShadow && e.spread && Math.abs(e.spread) > 0.01) {
+          // Spread grows or shrinks the shadow's shape. The wrapper does not clip, so cast the shadow from a box of that size.
+          var sp = e.spread, ssid = id(), bw = Math.max(1, w + 2 * sp), bh = Math.max(1, h + 2 * sp);
+          shadowBoxes += '<LayoutComponent width="' + num(bw) + '" height="' + num(bh) + '" styleId="' + ssid + '" clip="false" name="Shadow" id="' + id() + '">' +
+            '<LayoutComponentStyle layoutWidthScaleType="fixed" layoutHeightScaleType="fixed" positionTypeValue="absolute" positionLeft="' + num(-sp) + '" positionLeftUnitsValue="points" positionTop="' + num(-sp) + '" positionTopUnitsValue="points"' +
+            radiusAttrs(radii(node).map(function (v) { return Math.max(0, v + sp); })) + ' name="Shadow Style" id="' + ssid + '"/>' + f + '</LayoutComponent>';
+        } else if (o.splitShadow) shadowOut += f; else out += f;
+        shadowed = true;
+      });
+      var shadowBlocksClip = shadowed && !o.splitShadow;
+      var align = o.forceCenter ? 'CENTER' : (node.strokeAlign || 'CENTER');
+      if (hasStroke) {
+        // An opaque fill (solid, or a gradient with no see-through stops) hides the inner half of a double-width stroke, leaving a true outside stroke.
+        var opaque = fills.some(function (p) {
+          if (p.opacity !== undefined && p.opacity < 0.99) return false;
+          if (p.type === 'SOLID') return p.color.a === undefined || p.color.a >= 0.99;
+          if (p.type.indexOf('GRADIENT') === 0 && p.gradientStops && p.gradientStops.length) return p.gradientStops.every(function (g) { return g.color.a === undefined || g.color.a >= 0.99; });
+          return false;
+        });
+        if (align === 'INSIDE' && !shadowBlocksClip && !o.noClip) { tail += strokesAt(sw * 2); clip = true; }
+        else if (align === 'OUTSIDE' && o.splitShadow && !o.flowShadow) {
+          // The wrapper does not clip, so an outline box slightly larger than the frame, stroked on its centre line, gives a true outside stroke
+          // whatever the fill is (a double-width stroke would show through a see-through fill).
+          var osid = id();
+          shadowBoxes += '<LayoutComponent width="' + num(w + sw) + '" height="' + num(h + sw) + '" styleId="' + osid + '" clip="false" name="Outside Stroke" id="' + id() + '">' +
+            '<LayoutComponentStyle layoutWidthScaleType="fixed" layoutHeightScaleType="fixed" positionTypeValue="absolute" positionLeft="' + num(-sw / 2) + '" positionLeftUnitsValue="points" positionTop="' + num(-sw / 2) + '" positionTopUnitsValue="points"' +
+            radiusAttrs(radii(node).map(function (v) { return v > 0 ? v + sw / 2 : 0; })) + ' name="Outside Stroke Style" id="' + osid + '"/>' + strokesAt(sw) + '</LayoutComponent>';
+        }
+        else if (align === 'OUTSIDE' && opaque) { if (o.splitShadow) shadowOut += strokesAt(sw * 2); else out += strokesAt(sw * 2); } // with a shadow wrapper the stroke goes on the wrapper, which does not clip
+        else {
+          if (align !== 'CENTER') warn(node, 'stroke is ' + align + ' but ' + (align === 'INSIDE' ? 'it also has a shadow that cannot be separated here' : 'the fill is not opaque') + '; it is drawn centred instead');
+          tail += strokesAt(sw);
+        }
+      }
+      fills.forEach(function (p) {
+        var body = paintBody(p, node, w, h, undefined, o.centered);
+        if (body) out += '<Fill' + (blur ? ' fillRule="clockwise"' : node.__evenOdd ? ' fillRule="evenOdd"' : '') + paintBlend(p, node) + ' name="Fill">' + body + blurFx + '</Fill>';
+      });
+      if (surface) inners.forEach(function (e) { var f = featherFill(e, true); if (o.splitInner) innerOut += f; else out += f; });
+      return { xml: out + tail, shadowXml: shadowOut, shadowBoxXml: shadowBoxes, innerXml: innerOut, clip: clip, shadowed: shadowed };
+    }
+
+    // ---- blend modes --------------------------------------------------
+    var BLEND = { LINEAR_DODGE: 'additive', SCREEN: 'screen', MULTIPLY: 'multiply', OVERLAY: 'overlay', DARKEN: 'darken', LIGHTEN: 'lighten',
+      COLOR_DODGE: 'colorDodge', COLOR_BURN: 'colorBurn', HARD_LIGHT: 'hardLight', SOFT_LIGHT: 'softLight', DIFFERENCE: 'difference',
+      EXCLUSION: 'exclusion', HUE: 'hue', SATURATION: 'saturation', COLOR: 'color', LUMINOSITY: 'luminosity' };
+    // A single fill or stroke can have its own blend mode too (Figma: the blend icon in the paint popover).
+    function paintBlend(paint, node) {
+      var b = paint && paint.blendMode;
+      if (!b || b === 'NORMAL' || b === 'PASS_THROUGH') return '';
+      if (BLEND[b]) return ' blendModeValue="' + BLEND[b] + '"';
+      warn(node, 'a fill or stroke uses the ' + b + ' blend mode, which Rive does not have; drawn normally');
+      return '';
+    }
+    function blendAttr(node) {
+      var b = node.blendMode;
+      if (!b || b === 'NORMAL' || b === 'PASS_THROUGH') return '';
+      if (BLEND[b]) return ' blendModeValue="' + BLEND[b] + '"';
+      warn(node, 'blend mode ' + b + ' has no Rive equivalent; drawn normally');
+      return '';
+    }
+
+    // ---- placement (position + rotation) ------------------------------
+    // Figma gives x,y of the rotated node's top-left corner; Rive rotates about a centre point.
+    function place(node) {
+      var w = node.width, h = node.height, m = node.relativeTransform;
+      if (m) {
+        var a = m[0][0], c = m[0][1], tx = m[0][2], b = m[1][0], d = m[1][1], ty = m[1][2];
+        var cx = tx + a * w / 2 + c * h / 2, cy = ty + b * w / 2 + d * h / 2;
+        var rot = Math.atan2(b, a);
+        if (Math.abs(rot) < 1e-4) rot = 0;
+        return { cx: cx, cy: cy, x: cx - w / 2, y: cy - h / 2, rot: rot, flip: a * d - c * b < 0 };
+      }
+      var r = node.rotation ? -node.rotation * Math.PI / 180 : 0;
+      return { cx: node.x + w / 2, cy: node.y + h / 2, x: node.x, y: node.y, rot: r };
+    }
+    function rotAttr(p) { return p.rot ? ' rotation="' + num(p.rot) + '"' : ''; }
+    // A mirrored frame (negative determinant): rotate by atan2(b, a) as usual, and what is left is a top-to-bottom flip of its own contents.
+    function flipAttr(p) { return ''; } // a LayoutComponent cannot be mirrored directly; its contents are (see the wrapper Node)
+
+    // ---- corner radius -----------------------------------------------
+    function radii(node) {
+      if (node.topLeftRadius !== undefined) {
+        return [node.topLeftRadius || 0, node.topRightRadius || 0, node.bottomLeftRadius || 0, node.bottomRightRadius || 0];
+      }
+      var r = typeof node.cornerRadius === 'number' ? node.cornerRadius : 0;
+      return [r, r, r, r];
+    }
+    function radiusAttrs(r) {
+      if (!r[0] && !r[1] && !r[2] && !r[3]) return '';
+      return ' cornerRadiusTL="' + num(r[0]) + '" cornerRadiusTR="' + num(r[1]) + '" cornerRadiusBL="' + num(r[2]) + '" cornerRadiusBR="' + num(r[3]) + '"';
+    }
+
+    // ---- layout -------------------------------------------------------
+    var SCALE = { FIXED: 'fixed', HUG: 'hug', FILL: 'fill' };
+    function hasAutoLayout(n) { return n.layoutMode === 'HORIZONTAL' || n.layoutMode === 'VERTICAL'; }
+
+    function sizing(node, parentLayoutMode) {
+      var h = node.layoutSizingHorizontal, v = node.layoutSizingVertical;
+      if (!h || !v) { // older snapshots: derive from grow/align
+        var row = parentLayoutMode === 'HORIZONTAL';
+        h = h || ((row ? node.layoutGrow : node.layoutAlign === 'STRETCH') ? 'FILL' : 'FIXED');
+        v = v || ((row ? node.layoutAlign === 'STRETCH' : node.layoutGrow) ? 'FILL' : 'FIXED');
+      }
+      return { h: SCALE[h] || 'fixed', v: SCALE[v] || 'fixed' };
+    }
+
+    function alignment(node) {
+      var row = node.layoutMode === 'HORIZONTAL';
+      var prim = node.primaryAxisAlignItems || 'MIN';
+      var cnt = node.counterAxisAlignItems || 'MIN';
+      if (cnt === 'BASELINE') cnt = 'MIN';
+      var map = { MIN: 0, CENTER: 1, MAX: 2 };
+      if (prim === 'SPACE_BETWEEN') {
+        return 'spaceBetween' + ['Start', 'Center', 'End'][map[cnt]];
+      }
+      var hor, ver;
+      if (row) { hor = map[prim]; ver = map[cnt]; } else { ver = map[prim]; hor = map[cnt]; }
+      var names = [['topLeft', 'topCenter', 'topRight'], ['centerLeft', 'center', 'centerRight'], ['bottomLeft', 'bottomCenter', 'bottomRight']];
+      return names[ver][hor];
+    }
+
+    function styleXml(node, o) {
+      // o: {styleId, name, w, h, sizing:{h,v}|null, abs:{x,y,w,h,parent}|null, isArtboard}
+      var a = '';
+      if (hasAutoLayout(node)) {
+        a += attr('flexDirectionValue', node.layoutMode === 'HORIZONTAL' ? 'row' : 'column');
+        a += attr('layoutAlignmentType', alignment(node));
+        var wrap = node.layoutWrap === 'WRAP';
+        if (wrap) a += attr('flexWrapValue', 'wrap');
+        var row = node.layoutMode === 'HORIZONTAL';
+        var gap = node.itemSpacing || 0, cgap = node.counterAxisSpacing;
+        if (cgap === undefined || cgap === null) cgap = gap;
+        var gh = row ? gap : (wrap ? cgap : 0), gv = row ? (wrap ? cgap : 0) : gap;
+        if (gh) a += ' gapHorizontal="' + num(gh) + '" gapHorizontalUnitsValue="points"';
+        if (gv) a += ' gapVertical="' + num(gv) + '" gapVerticalUnitsValue="points"';
+        var pads = [['paddingLeft', node.paddingLeft], ['paddingRight', node.paddingRight], ['paddingTop', node.paddingTop], ['paddingBottom', node.paddingBottom]];
+        pads.forEach(function (p) { if (p[1]) a += ' ' + p[0] + '="' + num(p[1]) + '" ' + p[0] + 'UnitsValue="points"'; });
+      }
+      if (o.sizing) {
+        a += attr('layoutWidthScaleType', o.sizing.h) + attr('layoutHeightScaleType', o.sizing.v);
+      } else {
+        a += attr('layoutWidthScaleType', 'fixed') + attr('layoutHeightScaleType', 'fixed');
+      }
+      if (node.minWidth) a += ' minWidth="' + num(node.minWidth) + '"';
+      if (node.maxWidth) a += ' maxWidth="' + num(node.maxWidth) + '"';
+      if (node.minHeight) a += ' minHeight="' + num(node.minHeight) + '"';
+      if (node.maxHeight) a += ' maxHeight="' + num(node.maxHeight) + '"';
+      if (o.pinned) {
+        var p = o.pinned;
+        a += ' positionTypeValue="absolute"';
+        a += ' positionLeft="' + num(p.x) + '" positionLeftUnitsValue="points"';
+        a += ' positionTop="' + num(p.y) + '" positionTopUnitsValue="points"';
+      }
+      if (!o.isArtboard) a += radiusAttrs(radii(node));
+      return '<LayoutComponentStyle' + a + ' name="' + esc(o.name) + ' Style" id="' + o.styleId + '"/>';
+    }
+
+    // ---- images -------------------------------------------------------
+    function registerImage(paint, node) {
+      var info = snapshot.images && snapshot.images[paint.imageHash];
+      if (!info) { warn(node, 'image fill has no image data (open the plugin from a file you can read)'); return null; }
+      if (!imageAssets[paint.imageHash]) {
+        imageAssets[paint.imageHash] = { hash: paint.imageHash, ext: info.ext, file: 'images/' + paint.imageHash + '.' + info.ext, id: id() };
+      }
+      return imageAssets[paint.imageHash].id;
+    }
+    // The image sits in a fixed, pinned, clipping box the size of its parent, drawn last (underneath).
+    function imageWrapper(node, paint, w, h) {
+      var aid = registerImage(paint, node);
+      if (!aid) return '';
+      if (paint.scaleMode === 'CROP' || paint.scaleMode === 'TILE') warn(node, 'image mode ' + paint.scaleMode + ' is shown as "fill"');
+      var fit = paint.scaleMode === 'FIT' ? 'contain' : 'cover';
+      var sid = id();
+      var op = (paint.opacity !== undefined && paint.opacity < 1) ? ' opacity="' + num(paint.opacity) + '"' : '';
+      return '<LayoutComponent width="' + num(w) + '" height="' + num(h) + '" styleId="' + sid + '" clip="true" name="Image Fill" id="' + id() + '">' +
+        '<LayoutComponentStyle layoutWidthScaleType="fixed" layoutHeightScaleType="fixed" positionTypeValue="absolute" ' +
+        'positionLeft="0" positionLeftUnitsValue="points" positionTop="0" positionTopUnitsValue="points"' + radiusAttrs(radii(node)) +
+        ' name="Image Fill Style" id="' + sid + '"/>' +
+        '<Image assetId="' + aid + '" fit="' + fit + '"' + op + ' name="' + esc(node.name) + ' Image" id="' + id() + '">' +
+        '<LayoutParticipant layoutWidthScaleType="fill" layoutHeightScaleType="fill" name="Image Layout"/></Image></LayoutComponent>';
+    }
+
+    // ---- fonts / text -------------------------------------------------
+    function fontFile(family, style) {
+      var safe = function (s) { return String(s).replace(/[^A-Za-z0-9]+/g, ''); };
+      return 'fonts/' + safe(family) + '-' + safe(style) + '.ttf';
+    }
+    function fontAsset(family, style) {
+      var key = family + '|' + style;
+      if (!fontAssetIds[key]) {
+        fontAssetIds[key] = id();
+        fonts[key] = { family: family, style: style, file: fontFile(family, style), assetId: fontAssetIds[key] };
+      }
+      return fontAssetIds[key];
+    }
+
+    function textXml(node, ctx) {
+      var segs = node.segments && node.segments.length ? node.segments : [{
+        characters: node.characters || '', fontSize: node.fontSize, fontName: node.fontName,
+        letterSpacing: node.letterSpacing, lineHeight: node.lineHeight, fills: node.fills
+      }];
+      var styles = '', runs = '';
+      segs.forEach(function (s, i) {
+        var fn = s.fontName || { family: 'Inter', style: 'Regular' };
+        var fid = fontAsset(fn.family, fn.style);
+        var sid = id();
+        var size = s.fontSize || 14;
+        var ls = 0;
+        if (s.letterSpacing && s.letterSpacing.unit === 'PIXELS') ls = s.letterSpacing.value;
+        else if (s.letterSpacing && s.letterSpacing.unit === 'PERCENT') ls = s.letterSpacing.value / 100 * size;
+        var lh = -1;
+        if (s.lineHeight && s.lineHeight.unit === 'PIXELS') lh = s.lineHeight.value;
+        else if (s.lineHeight && s.lineHeight.unit === 'PERCENT') lh = s.lineHeight.value / 100 * size;
+        var paint = visiblePaints(s.fills)[0];
+        var body = paint ? paintBody(paint, node, node.width, node.height, node.opacity) : null;
+        if (!body) body = '<SolidColor colorValue="FF000000" name="Color"/>';
+        styles += '<TextStylePaint fontSize="' + num(size) + '" fontAssetId="' + fid + '" familyName="' + esc(fn.family) +
+          '" styleName="' + esc(fn.style) + '"' + (lh > 0 ? ' lineHeight="' + num(lh) + '"' : '') +
+          (ls ? ' letterSpacing="' + num(ls) + '"' : '') + ' name="Style ' + (i + 1) + '" id="' + sid + '"><Fill name="Fill">' + body + '</Fill></TextStylePaint>';
+        runs += '<TextValueRun styleId="' + sid + '" text="' + esc(s.characters) + '" name="Run ' + (i + 1) + '"/>';
+      });
+      var align = { LEFT: 'left', CENTER: 'center', RIGHT: 'right', JUSTIFIED: 'left' }[node.textAlignHorizontal || 'LEFT'];
+      if (node.textAlignHorizontal === 'JUSTIFIED') warn(node, 'justified text is left-aligned');
+      var vAlign = { TOP: 'top', CENTER: 'middle', BOTTOM: 'bottom' }[node.textAlignVertical || 'TOP'];
+      var sz = ctx.inLayout ? ctx.sizing : null;
+      var auto = node.textAutoResize || 'NONE';
+      var sizingValue = auto === 'WIDTH_AND_HEIGHT' ? 'autoWidth' : auto === 'HEIGHT' ? 'autoHeight' : 'fixed';
+      var a = attr('sizingValue', sizingValue) + attr('alignValue', align) + attr('verticalAlignValue', vAlign);
+      if (sizingValue !== 'autoWidth') a += ' width="' + num(node.width) + '"';
+      if (sizingValue === 'fixed') a += ' height="' + num(node.height) + '"';
+      var pl = place(node);
+      if ((node.effects || []).some(function (e) { return e.visible !== false && (e.type === 'DROP_SHADOW' || e.type === 'INNER_SHADOW' || e.type === 'LAYER_BLUR'); })) {
+        warn(node, 'shadow/blur on text is not converted');
+      }
+      if (!ctx.inLayout) {
+        if (pl.rot) a += ' originX="0.5" originY="0.5" x="' + num(pl.cx) + '" y="' + num(pl.cy) + '"';
+        else a += ' x="' + num(pl.x) + '" y="' + num(pl.y) + '"';
+      }
+      a += rotAttr(pl) + blendAttr(node);
+      if (node.opacity !== undefined && node.opacity < 1) a += ' opacity="' + num(node.opacity) + '"';
+      var part = '';
+      if (ctx.inLayout) {
+        part = '<LayoutParticipant layoutWidthScaleType="' + sz.h + '" layoutHeightScaleType="' + sz.v + '"' +
+          (sz.h === 'fixed' ? ' width="' + num(node.width) + '"' : '') + (sz.v === 'fixed' ? ' height="' + num(node.height) + '"' : '') +
+          ' name="' + esc(node.name) + ' Layout"/>';
+      }
+      return '<Text' + a + ' name="' + esc(node.name) + '" id="' + id() + '">' + part + styles + runs + '</Text>';
+    }
+
+    // ---- leaf shapes --------------------------------------------------
+    // SVG path data (M L H V C Q Z, absolute or relative) -> contours of anchors with bezier handles.
+    function parsePath(d) {
+      var toks = String(d || '').match(/[MmLlHhVvCcSsQqTtZz]|-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/g) || [];
+      var contours = [], cur = null, i = 0, cmd = '', x = 0, y = 0, sx = 0, sy = 0, lcx = 0, lcy = 0, lastC = false;
+      function n() { return parseFloat(toks[i++]); }
+      function start(px, py) { cur = { pts: [{ x: px, y: py, inx: 0, iny: 0, outx: 0, outy: 0 }], closed: false }; contours.push(cur); }
+      function line(px, py) { cur.pts.push({ x: px, y: py, inx: 0, iny: 0, outx: 0, outy: 0 }); }
+      function cubic(c1x, c1y, c2x, c2y, px, py) {
+        var p0 = cur.pts[cur.pts.length - 1];
+        // A curve whose handles lie on the straight line between its ends is just a line (lets corner radius apply).
+        var ex = px - p0.x, ey = py - p0.y, el = Math.hypot(ex, ey) || 1;
+        if (Math.abs((c1x - p0.x) * ey - (c1y - p0.y) * ex) / el < 1e-3 && Math.abs((c2x - p0.x) * ey - (c2y - p0.y) * ex) / el < 1e-3) { line(px, py); return; }
+        p0.outx = c1x - p0.x; p0.outy = c1y - p0.y;
+        cur.pts.push({ x: px, y: py, inx: c2x - px, iny: c2y - py, outx: 0, outy: 0 });
+      }
+      while (i < toks.length) {
+        if (/[A-Za-z]/.test(toks[i])) cmd = toks[i++];
+        var rel = cmd === cmd.toLowerCase(), C = cmd.toUpperCase(), dx = rel ? x : 0, dy = rel ? y : 0;
+        if (C === 'M') { x = n() + dx; y = n() + dy; start(x, y); sx = x; sy = y; cmd = rel ? 'l' : 'L'; lastC = false; }
+        else if (C === 'L') { x = n() + dx; y = n() + dy; line(x, y); lastC = false; }
+        else if (C === 'H') { x = n() + dx; line(x, y); lastC = false; }
+        else if (C === 'V') { y = n() + dy; line(x, y); lastC = false; }
+        else if (C === 'C') { var a1 = n() + dx, a2 = n() + dy, a3 = n() + dx, a4 = n() + dy, a5 = n() + dx, a6 = n() + dy; cubic(a1, a2, a3, a4, a5, a6); lcx = a3; lcy = a4; x = a5; y = a6; lastC = true; }
+        else if (C === 'S') { var b3 = n() + dx, b4 = n() + dy, b5 = n() + dx, b6 = n() + dy; var rx = lastC ? 2 * x - lcx : x, ry = lastC ? 2 * y - lcy : y; cubic(rx, ry, b3, b4, b5, b6); lcx = b3; lcy = b4; x = b5; y = b6; lastC = true; }
+        else if (C === 'Q') { var q1 = n() + dx, q2 = n() + dy, q3 = n() + dx, q4 = n() + dy; cubic(x + 2 / 3 * (q1 - x), y + 2 / 3 * (q2 - y), q3 + 2 / 3 * (q1 - q3), q4 + 2 / 3 * (q2 - q4), q3, q4); x = q3; y = q4; lastC = false; }
+        else if (C === 'Z') {
+          cur.closed = true; x = sx; y = sy; lastC = false;
+          // Figma repeats the first point at the end of a closed contour: fold it into the first anchor.
+          var f = cur.pts[0], l = cur.pts[cur.pts.length - 1];
+          if (cur.pts.length > 1 && Math.abs(f.x - l.x) < 1e-3 && Math.abs(f.y - l.y) < 1e-3) { f.inx = l.inx; f.iny = l.iny; cur.pts.pop(); }
+          cmd = '';
+        } else { i++; }
+      }
+      return contours;
+    }
+    function vertexXml(p, cx, cy, radius) {
+      var X = num(p.x - cx), Y = num(p.y - cy);
+      var inD = Math.hypot(p.inx, p.iny), outD = Math.hypot(p.outx, p.outy);
+      if (inD < 1e-3 && outD < 1e-3) return '<StraightVertex x="' + X + '" y="' + Y + '"' + (radius > 0 ? ' radius="' + num(radius) + '"' : '') + '/>';
+      return '<CubicDetachedVertex x="' + X + '" y="' + Y + '" inRotation="' + num(Math.atan2(p.iny, p.inx)) + '" inDistance="' + num(inD) +
+        '" outRotation="' + num(Math.atan2(p.outy, p.outx)) + '" outDistance="' + num(outD) + '"/>';
+    }
+    function pathsXml(node) {
+      var out = '';
+      (node.vectorPaths || []).forEach(function (vp) {
+        if (vp.windingRule === 'EVENODD') node.__evenOdd = true;
+        parsePath(vp.data).forEach(function (c) {
+          if (c.pts.length < 2) return;
+          // A mirrored layer (negative determinant) is its own shape mirrored top-to-bottom, about its centre, once the rotation is taken out.
+          var m = node.relativeTransform;
+          if (m && m[0][0] * m[1][1] - m[0][1] * m[1][0] < 0) {
+            c.pts.forEach(function (p) { p.y = node.height - p.y; p.iny = -p.iny; p.outy = -p.outy; });
+          }
+          // Figma's corner radius on a vector rounds its corner points (not the two ends of an open path).
+          var cr = (typeof node.cornerRadius === 'number' && node.cornerRadius > 0) ? node.cornerRadius : 0;
+          var area = 0;
+          c.pts.forEach(function (p, k) { var q = c.pts[(k + 1) % c.pts.length]; area += p.x * q.y - q.x * p.y; });
+          out += '<PointsPath isClosed="' + (c.closed ? 'true' : 'false') + '" isClockwise="' + (area >= 0 ? 'true' : 'false') + '" name="Path">' +
+            c.pts.map(function (p, k) { return vertexXml(p, node.width / 2, node.height / 2, cr && (c.closed || (k > 0 && k < c.pts.length - 1)) ? cr : 0); }).join('') + '</PointsPath>';
+        });
+      });
+      return out;
+    }
+
+    function geometryXml(node) {
+      switch (node.type) {
+        case 'RECTANGLE':
+          return '<Rectangle width="' + num(node.width) + '" height="' + num(node.height) + '"' + radiusAttrs(radii(node)) + ' name="Path"/>';
+        case 'ELLIPSE':
+          return '<Ellipse width="' + num(node.width) + '" height="' + num(node.height) + '" name="Path"/>';
+        case 'LINE':
+          return '<PointsPath name="Path"><StraightVertex x="' + num(-node.width / 2) + '" y="0"/><StraightVertex x="' + num(node.width / 2) + '" y="0"/></PointsPath>';
+        case 'VECTOR': case 'STAR': case 'POLYGON': case 'BOOLEAN_OPERATION': {
+          var xml = pathsXml(node);
+          return xml || null;
+        }
+      }
+      return null;
+    }
+
+    // INSIDE / OUTSIDE strokes on a plain rectangle or ellipse: draw the shape smaller (inside) or larger (outside) by the
+    // stroke width and stroke it centred. The stroke then covers exactly the same pixels as in Figma, with no clipping,
+    // a true centre line for dashes, and no conflict with shadows. Falls back to the clipped 2x stroke when a translucent
+    // stroke would sit on a fill (the fill would show a gap), or when shadows/blur are involved.
+    function tightStroke(node) {
+      if (options.exactStrokes === false) return null;
+      if (node.type !== 'RECTANGLE' && node.type !== 'ELLIPSE') return null;
+      var strokes = visiblePaints(node.strokes), sw = node.strokeWeight;
+      if (!strokes.length || !(sw > 0)) return null;
+      var al = node.strokeAlign;
+      if (al !== 'INSIDE' && al !== 'OUTSIDE') return null;
+      if ((node.effects || []).some(function (e) { return e.visible !== false && (e.type === 'DROP_SHADOW' || e.type === 'INNER_SHADOW' || e.type === 'LAYER_BLUR'); })) return null;
+      var allFills = visiblePaints(node.fills);
+      if (allFills.some(function (p) { return p.type === 'IMAGE'; })) return null;
+      function solid(p) {
+        if (p.opacity !== undefined && p.opacity < 0.99) return false;
+        if (p.type === 'SOLID') return p.color.a === undefined || p.color.a >= 0.99;
+        return (p.gradientStops || []).every(function (st) { return st.color.a === undefined || st.color.a >= 0.99; });
+      }
+      if (allFills.length && !strokes.every(solid)) return null;
+      var d = al === 'INSIDE' ? -sw : sw;
+      if (node.width + d <= 0 || node.height + d <= 0) return null;
+      return { d: d };
+    }
+    function adjustedGeometry(node, d) {
+      var g = Object.assign({}, node, { width: node.width + d, height: node.height + d });
+      var r = radii(node).map(function (v) { return v > 0 ? Math.max(0, v + d / 2) : 0; });
+      g.topLeftRadius = r[0]; g.topRightRadius = r[1]; g.bottomLeftRadius = r[2]; g.bottomRightRadius = r[3];
+      return g;
+    }
+
+    function shapeXml(node, ctx) {
+      var tight = tightStroke(node);
+      if (tight && ctx.inLayout) {
+        // In a layout flow the shape must still occupy its Figma size, so it sits in a fixed slot of that size.
+        var plS = place(node), sidS = id(), sz0 = ctx.sizing;
+        var inner = shapeXml(Object.assign({}, node, { relativeTransform: null, rotation: 0, x: 0, y: 0 }), { inLayout: false });
+        inner = inner.replace(/ x="[^"]*" y="[^"]*"/, ' x="' + num(node.width / 2) + '" y="' + num(node.height / 2) + '"');
+        return '<LayoutComponent width="' + num(node.width) + '" height="' + num(node.height) + '"' + rotAttr(plS) + flipAttr(plS) + ' styleId="' + sidS + '" clip="false" name="' + esc(node.name) + ' Slot" id="' + id() + '">' +
+          '<LayoutComponentStyle layoutWidthScaleType="' + sz0.h + '" layoutHeightScaleType="' + sz0.v + '" name="' + esc(node.name) + ' Slot Style" id="' + sidS + '"/>' +
+          ((plS.rot || plS.flip) ? '<ComponentOrigin originX="0.5" originY="0.5" name="Origin"/>' : '') + '<Node name="Art">' + inner + '</Node></LayoutComponent>';
+      }
+      var geo = geometryXml(tight ? adjustedGeometry(node, tight.d) : node);
+      if (!geo) { warn(node, 'unsupported node type skipped'); return ''; }
+      if (findImage(node)) warn(node, 'image fills on vector shapes are not converted');
+      var sid = id();
+      var pl = place(node);
+      var paints = paintsXml(node, node.width, node.height, { lineOnly: node.type === 'LINE', centered: true, forceCenter: !!tight });
+      if (!paints.xml) { warn(node, 'has no visible fill or stroke; skipped'); return ''; }
+      var a = '';
+      if (!ctx.inLayout) a += ' x="' + num(pl.cx) + '" y="' + num(pl.cy) + '"';
+      a += rotAttr(pl) + blendAttr(node);
+      if (node.opacity !== undefined && node.opacity < 1) a += ' opacity="' + num(node.opacity) + '"';
+      var part = '';
+      if (ctx.inLayout) {
+        var sz = ctx.sizing;
+        part = '<LayoutParticipant layoutWidthScaleType="' + sz.h + '" layoutHeightScaleType="' + sz.v + '"' +
+          (sz.h === 'fixed' ? ' width="' + num(node.width) + '"' : '') + (sz.v === 'fixed' ? ' height="' + num(node.height) + '"' : '') +
+          ' name="' + esc(node.name) + ' Layout"/>';
+      }
+      // An inside stroke is a 2x stroke clipped to the shape's own outline.
+      var clip = paints.clip ? '<ClippingShape sourceId="' + sid + '" name="Inside Stroke Clip"/>' : '';
+      return '<Shape' + a + ' name="' + esc(node.name) + '" id="' + sid + '">' + part + geo + paints.xml + clip + '</Shape>';
+    }
+
+    // ---- containers ---------------------------------------------------
+    var CONTAINERS = { FRAME: 1, GROUP: 1, COMPONENT: 1, INSTANCE: 1, COMPONENT_SET: 1 };
+
+    function childrenXml(node, parentIsAL) {
+      var list = (node.children || []).filter(function (c) { return c.visible !== false; });
+      // Figma lists bottom-to-top and Rive's first sibling draws on top, so
+      // free-placed children are reversed. Inside auto layout the declaration
+      // order is also the flow order, so it is kept as designed.
+      if (!parentIsAL) list = list.slice().reverse();
+      return list.map(function (c) { return nodeXml(c, node, parentIsAL); }).join('');
+    }
+
+    function nodeXml(node, parent, parentIsAL) {
+      var inFlow = parentIsAL && node.layoutPositioning !== 'ABSOLUTE';
+      var sz = sizing(node, parent && parent.layoutMode);
+      if (CONTAINERS[node.type]) return containerXml(node, parent, parentIsAL, inFlow, sz);
+      if (node.type === 'TEXT') return textXml(node, { inLayout: inFlow, sizing: sz });
+      if (node.type === 'SLICE' || node.type === 'STICKY' || node.type === 'SECTION') { warn(node, 'unsupported node type skipped'); return ''; }
+      // Rectangles and ellipses with an image fill become a clipping box holding the image.
+      if ((node.type === 'RECTANGLE' || node.type === 'ELLIPSE') && findImage(node)) {
+        var syn = Object.assign({}, node, { type: 'FRAME', layoutMode: 'NONE', clipsContent: true, children: [] });
+        if (node.type === 'ELLIPSE') {
+          var r = Math.min(node.width, node.height) / 2;
+          syn.cornerRadius = r; delete syn.topLeftRadius; delete syn.topRightRadius; delete syn.bottomLeftRadius; delete syn.bottomRightRadius;
+          if (Math.abs(node.width - node.height) > 0.5) warn(node, 'image in a non-circular ellipse is clipped to a rounded box');
+        }
+        return containerXml(syn, parent, parentIsAL, inFlow, sz);
+      }
+      if (parentIsAL && !inFlow) {
+        // An absolutely positioned leaf inside auto layout needs its own pinned box.
+        var pl = place(node), styleId = id();
+        var plain = Object.assign({}, node, { relativeTransform: null, rotation: 0, x: 0, y: 0 });
+        var inner = shapeXml(plain, { inLayout: false });
+        inner = inner.replace(/ x="[^"]*" y="[^"]*"/, ' x="' + num(node.width / 2) + '" y="' + num(node.height / 2) + '"');
+        return '<LayoutComponent width="' + num(node.width) + '" height="' + num(node.height) + '"' + rotAttr(pl) + flipAttr(pl) + ' styleId="' + styleId + '" name="' + esc(node.name) + ' Pin" id="' + id() + '">' +
+          styleXml({}, { styleId: styleId, name: node.name + ' Pin', sizing: { h: 'fixed', v: 'fixed' }, pinned: { x: pl.x, y: pl.y } }) +
+          ((pl.rot || pl.flip) ? '<ComponentOrigin originX="0.5" originY="0.5" name="Origin"/>' : '') +
+          '<Node name="Art">' + inner + '</Node></LayoutComponent>';
+      }
+      var ringArcs = angularRingShapes(node, inFlow, sz);
+      if (ringArcs) return ringArcs;
+      return endCapsXml(node, inFlow) + shapeXml(node, { inLayout: inFlow, sizing: sz });
+    }
+
+    // A ring with an angular (sweep) gradient stroke: Rive has no such gradient, so draw it as many short arcs, one shape each.
+    function angularRingShapes(node, inFlow, sz) {
+      if ((options.angularRings === undefined ? 'shapes' : options.angularRings) !== 'shapes' || node.type !== 'ELLIPSE' || inFlow) return null; // on by default: tested to survive a push and pull-back
+      var p = visiblePaints(node.strokes).filter(function (q) { return q.type === 'GRADIENT_ANGULAR' && q.gradientTransform && q.gradientStops && q.gradientStops.length; })[0];
+      if (!p || visiblePaints(node.strokes).length !== 1) return null;
+      var w = node.width, h = node.height, inv = invert(p.gradientTransform), c0 = apply(inv, 0.5, 0.5), cx = apply(inv, 1, 0.5), cy = apply(inv, 0.5, 1);
+      var xd = [(cx[0] - c0[0]) * w, (cx[1] - c0[1]) * h], yd = [(cy[0] - c0[0]) * w, (cy[1] - c0[1]) * h];
+      var a0 = Math.atan2(xd[1], xd[0]), dir = (xd[0] * yd[1] - xd[1] * yd[0]) >= 0 ? 1 : -1;
+      var stops = p.gradientStops.slice().sort(function (a, b) { return a.position - b.position; });
+      function at(t) {
+        if (t <= stops[0].position) return stops[0].color;
+        if (t >= stops[stops.length - 1].position) return stops[stops.length - 1].color;
+        for (var i = 0; i < stops.length - 1; i++) if (t >= stops[i].position && t <= stops[i + 1].position) {
+          var span = stops[i + 1].position - stops[i].position, f = span > 1e-9 ? (t - stops[i].position) / span : 0, lo = stops[i].color, hi = stops[i + 1].color;
+          var m = function (k) { return (lo[k] === undefined ? 1 : lo[k]) * (1 - f) + (hi[k] === undefined ? 1 : hi[k]) * f; };
+          return { r: m('r'), g: m('g'), b: m('b'), a: m('a') };
+        }
+        return stops[0].color;
+      }
+      var N = 36, out = '', op = p.opacity === undefined ? 1 : p.opacity;
+      for (var i = 0; i < N; i++) {
+        var t0 = i / N, t1 = (i + 1) / N, col = at((t0 + t1) / 2);
+        if ((col.a === undefined ? 1 : col.a) * op < 0.01) continue;
+        var u = (((a0 + dir * 2 * Math.PI * (dir > 0 ? t0 : t1) + Math.PI / 2) / (2 * Math.PI)) % 1 + 1) % 1;
+        out += shapeXml(Object.assign({}, node, { name: node.name + ' arc ' + (i + 1), strokes: [{ type: 'SOLID', visible: true, opacity: op, color: col }], fills: i === 0 ? node.fills : [], effects: i === 0 ? node.effects : [], __arc: { offset: u, len: 1 / N + 0.0008 } }), { inLayout: false, sizing: sz });
+      }
+      return out;
+    }
+
+    // Figma's "dot" stroke end (CIRCLE_FILLED) has no Rive equivalent: draw a small filled circle at that end, above the line.
+    // An open arrowhead (two short strokes meeting at the tip) at one end of a line. dirX/dirY point OUT of the line.
+    function arrowXml(node, m, tx, ty, dirX, dirY, stroke, sw) {
+      var len = Math.hypot(dirX, dirY); if (len < 1e-6) return '';
+      // direction into parent space (linear part only), tip into parent space (full transform)
+      var dx = m[0][0] * dirX + m[0][1] * dirY, dy = m[1][0] * dirX + m[1][1] * dirY, dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl;
+      var ax = m[0][2] + m[0][0] * tx + m[0][1] * ty, ay = m[1][2] + m[1][0] * tx + m[1][1] * ty;
+      var L = Math.max(3, 5 * sw), ang = Math.PI / 4, c = Math.cos(ang), s = Math.sin(ang);
+      // the two wings point back from the tip, 45 degrees either side of the line
+      var bx = -dx, by = -dy, w1 = [L * (bx * c - by * s), L * (bx * s + by * c)], w2 = [L * (bx * c + by * s), L * (-bx * s + by * c)];
+      var col = stroke.type === 'SOLID' ? stroke.color : ((stroke.gradientStops || [])[0] || {}).color;
+      if (!col) return '';
+      var op = (stroke.opacity === undefined ? 1 : stroke.opacity) * (node.opacity === undefined ? 1 : node.opacity);
+      return '<Shape x="' + num(ax) + '" y="' + num(ay) + '" name="' + esc(node.name) + ' arrow" id="' + id() + '"><PointsPath isClosed="false" name="Path">' +
+        '<StraightVertex x="' + num(w1[0]) + '" y="' + num(w1[1]) + '"/><StraightVertex x="0" y="0"/><StraightVertex x="' + num(w2[0]) + '" y="' + num(w2[1]) + '"/></PointsPath>' +
+        '<Stroke thickness="' + num(sw) + '" cap="round" join="round" name="Stroke"><SolidColor colorValue="' + colorHex(col, op) + '" name="Color"/></Stroke></Shape>';
+    }
+    function lineEnds(node) {
+      var cs = (node.vectorPaths && node.vectorPaths[0]) ? parsePath(node.vectorPaths[0].data) : [];
+      var c = cs[0]; if (!c || c.pts.length < 2 || c.closed) return null;
+      var a = c.pts[0], a1 = c.pts[1], z = c.pts[c.pts.length - 1], z1 = c.pts[c.pts.length - 2];
+      var out0 = Math.hypot(a.outx, a.outy) > 1e-3 ? [a.x - (a.x + a.outx), a.y - (a.y + a.outy)] : [a.x - a1.x, a.y - a1.y];
+      var out1 = Math.hypot(z.inx, z.iny) > 1e-3 ? [-z.inx, -z.iny] : [z.x - z1.x, z.y - z1.y];
+      return { start: { x: a.x, y: a.y, dx: out0[0], dy: out0[1] }, end: { x: z.x, y: z.y, dx: out1[0], dy: out1[1] } };
+    }
+    function endCapsXml(node, inFlow) {
+      if (inFlow || !node.relativeTransform) return '';
+      var stroke0 = visiblePaints(node.strokes)[0];
+      if (!stroke0) return '';
+      var arrows = '';
+      // Arrowheads: one cap for the whole line, or a different cap per end.
+      var ends = (node.type === 'VECTOR' && (node.strokeCap === 'ARROW_LINES' || (node.endCaps || []).some(function (c) { return c.cap === 'ARROW_LINES'; }))) ? lineEnds(node) : null;
+      if (ends) {
+        var sw0 = node.strokeWeight || 1;
+        if (node.strokeCap === 'ARROW_LINES') { arrows += arrowXml(node, node.relativeTransform, ends.start.x, ends.start.y, ends.start.dx, ends.start.dy, stroke0, sw0) + arrowXml(node, node.relativeTransform, ends.end.x, ends.end.y, ends.end.dx, ends.end.dy, stroke0, sw0); }
+        else (node.endCaps || []).forEach(function (c) {
+          if (c.cap !== 'ARROW_LINES') return;
+          var e = (Math.hypot(c.x - ends.start.x, c.y - ends.start.y) <= Math.hypot(c.x - ends.end.x, c.y - ends.end.y)) ? ends.start : ends.end;
+          arrows += arrowXml(node, node.relativeTransform, e.x, e.y, e.dx, e.dy, stroke0, sw0);
+        });
+      }
+      if (!node.endCaps || !node.endCaps.length) return arrows;
+      var stroke = stroke0;
+      var m = node.relativeTransform, sw = node.strokeWeight || 1, d = Math.max(3, 5.5 * sw), out = arrows;
+      node.endCaps.forEach(function (c) {
+        if (c.cap === 'ARROW_LINES') return;
+        if (c.cap !== 'CIRCLE_FILLED') { warn(node, 'stroke end "' + c.cap + '" is drawn as a plain end'); return; }
+        var ax = m[0][2] + m[0][0] * c.x + m[0][1] * c.y, ay = m[1][2] + m[1][0] * c.x + m[1][1] * c.y;
+        out += shapeXml({ id: node.id + ':cap', name: node.name + ' end dot', type: 'ELLIPSE', visible: true, x: ax - d / 2, y: ay - d / 2, width: d, height: d, opacity: node.opacity === undefined ? 1 : node.opacity,
+          rotation: 0, relativeTransform: null, fills: [stroke], strokes: [], effects: [] }, { inLayout: false });
+      });
+      return out;
+    }
+
+    function containerXml(node, parent, parentIsAL, inFlow, sz) {
+      if (node.type === 'INSTANCE' && linkComponents && node.mainComponentId && compIds[node.mainComponentId]) {
+        // A live link: the instance becomes a sized slot holding a nested artboard of its component.
+        // Only when it looks the same as its component; an instance with its own colours, text or size stays plain layout.
+        var cmp = compById[node.mainComponentId];
+        var look = function (v) { return JSON.stringify(v, function (k, x) { return k === 'boundVariables' ? undefined : (typeof x === 'number' ? Math.round(x * 1000) / 1000 : x); }); };
+        var sig = function (n) { return [n.type, Math.round(n.width), Math.round(n.height), n.characters || '', look(n.fills || []), look(n.strokes || []), look(n.effects || []), n.visible !== false, n.opacity, (n.children || []).map(sig).join('|')].join('~'); };
+        var kids = function (n) { return (n.children || []).map(sig).join('|'); };
+        var same = kids(node) === kids(cmp) && Math.abs(node.width - cmp.width) <= 0.5 && Math.abs(node.height - cmp.height) <= 0.5;
+        if (same) {
+          linkedInst++;
+          node = Object.assign({}, node, { type: 'FRAME', fills: [], strokes: [], effects: [], children: [], layoutMode: 'NONE', clipsContent: false, cornerRadius: 0, topLeftRadius: undefined, topRightRadius: undefined, bottomLeftRadius: undefined, bottomRightRadius: undefined, __nested: compIds[node.mainComponentId], __nestedName: cmp.name });
+        } else changedInst++;
+      }
+      if (node.type === 'INSTANCE') detached++;
+      var al = hasAutoLayout(node);
+      var w = node.width, h = node.height;
+      var pl = place(node);
+      var img = findImage(node);
+      var hasDrop = (node.effects || []).some(function (e) { return e.visible !== false && e.type === 'DROP_SHADOW'; });
+      var insideStroke = visiblePaints(node.strokes).length && node.strokeWeight > 0 && node.strokeAlign === 'INSIDE';
+      // A clipping box also clips its own shadow. So when a frame clips AND casts a shadow, the shadow is drawn by a
+      // wrapper that does not clip, and the frame itself (clip on) sits inside it.
+      var wrapShadow = hasDrop && (node.clipsContent || insideStroke) && !!(visiblePaints(node.fills).length || visiblePaints(node.strokes).length || img);
+      var paints = paintsXml(node, w, h, { hasImage: !!img, hasChildren: (node.children || []).length > 0, splitShadow: wrapShadow, flowShadow: !!(parentIsAL && inFlow), splitInner: options.innerShadowOverChildren !== false && (node.children || []).some(function (c) { return c.visible !== false; }) });
+      var o = { styleId: id(), name: node.name, sizing: parentIsAL && inFlow ? sz : { h: 'fixed', v: 'fixed' } };
+      // A frame without auto layout has free-placed children that Rive cannot
+      // measure, so "hug" would collapse it to nothing. Keep the drawn size.
+      if (!al && o.sizing.h === 'hug') o.sizing = { h: 'fixed', v: o.sizing.v };
+      if (!al && o.sizing.v === 'hug') o.sizing = { h: o.sizing.h, v: 'fixed' };
+      // A layout box joins its parent's flow, so anything free-placed (absolute in
+      // auto layout, or inside a plain frame) is pinned to its position.
+      var pinned = (parent && ((parentIsAL && !inFlow) || !parentIsAL)) ? { x: pl.x, y: pl.y } : null;
+      var clip = wrapShadow ? true : ((node.clipsContent && !paints.shadowed) || paints.clip);
+      if (!wrapShadow && node.clipsContent && paints.shadowed) warn(node, 'clip content is turned off so its shadow can show');
+      if (wrapShadow && !node.clipsContent) warn(node, 'clip content is on for this frame so its inside stroke can be drawn (its shadow still shows)');
+      var inner = node.__nested ? '<NestedArtboardLeaf artboardId="' + node.__nested + '" fit="contain" name="' + esc(String(node.__nestedName).trim()) + '"/>' : al ? childrenXml(node, true) : '<Node' + (pl.flip ? ' y="' + num(h) + '" scaleY="-1"' : '') + ' name="' + esc(String(node.name).trim()) + ' (Wrapper)">' + childrenXml(node, false) + '</Node>';
+      var imgXml = img ? imageWrapper(node, img, w, h) : '';
+      // In Figma an inner shadow also shades the layers inside the frame, so it is drawn on an overlay ABOVE the contents
+      // (first sibling = on top), clipped to the frame's rounded shape.
+      var overlay = '';
+      if (paints.innerXml) {
+        var osid = id();
+        overlay = '<LayoutComponent width="' + num(w) + '" height="' + num(h) + '" styleId="' + osid + '" clip="true" name="Inner Shadow" id="' + id() + '">' +
+          '<LayoutComponentStyle layoutWidthScaleType="fixed" layoutHeightScaleType="fixed" positionTypeValue="absolute" positionLeft="0" positionLeftUnitsValue="points" positionTop="0" positionTopUnitsValue="points"' +
+          radiusAttrs(radii(node)) + ' name="Inner Shadow Style" id="' + osid + '"/>' + paints.innerXml + '</LayoutComponent>';
+      }
+      var origin = (pl.rot || pl.flip) ? '<ComponentOrigin originX="0.5" originY="0.5" name="Origin"/>' : '';
+      var opac = (node.opacity !== undefined && node.opacity < 1) ? ' opacity="' + num(node.opacity) + '"' : '';
+
+      if (!wrapShadow) {
+        o.pinned = pinned;
+        var attrs = ' width="' + num(w) + '" height="' + num(h) + '"' + rotAttr(pl) + flipAttr(pl) + blendAttr(node) + ' styleId="' + o.styleId + '" clip="' + (clip ? 'true' : 'false') + '"' + opac;
+        return '<LayoutComponent' + attrs + ' name="' + esc(node.name) + '" id="' + id() + '">' +
+          styleXml(node, o) + origin + paints.xml + overlay + inner + imgXml + '</LayoutComponent>';
+      }
+
+      // wrapper (shadow, position, rotation, opacity, outer sizing) + inner frame (clip, fills, strokes, children, layout)
+      var wrapStyleId = id(), innerStyleId = o.styleId;
+      var radiusNode = {}; ['cornerRadius', 'topLeftRadius', 'topRightRadius', 'bottomLeftRadius', 'bottomRightRadius'].forEach(function (k) { if (node[k] !== undefined) radiusNode[k] = node[k]; });
+      var outer = { styleId: wrapStyleId, name: node.name + ' Shadow', sizing: o.sizing, pinned: pinned };
+      var innerSizing = { h: o.sizing.h === 'hug' ? 'hug' : 'fill', v: o.sizing.v === 'hug' ? 'hug' : 'fill' };
+      var innerO = { styleId: innerStyleId, name: node.name, sizing: innerSizing };
+      var wrapAttrs = ' width="' + num(w) + '" height="' + num(h) + '"' + rotAttr(pl) + flipAttr(pl) + blendAttr(node) + ' styleId="' + wrapStyleId + '" clip="false"' + opac;
+      var innerAttrs = ' width="' + num(w) + '" height="' + num(h) + '" styleId="' + innerStyleId + '" clip="true"';
+      return '<LayoutComponent' + wrapAttrs + ' name="' + esc(node.name) + ' Shadow" id="' + id() + '">' +
+        styleXml(radiusNode, outer) + origin + paints.shadowXml +
+        '<LayoutComponent' + innerAttrs + ' name="' + esc(node.name) + '" id="' + id() + '">' +
+        styleXml(node, innerO) + paints.xml + overlay + inner + imgXml + '</LayoutComponent>' +
+        // Rive draws the first child on top, so the shadow and outside-stroke boxes go AFTER the frame to sit behind it.
+        paints.shadowBoxXml + '</LayoutComponent>';
+    }
+
+    var componentAssets = [];
+    var compIds = {}, compById = {}, linkedInst = 0, changedInst = 0;
+    var linkComponents = options.linkComponents !== false && componentArtboards;
+    function artboardXml(node, isComponent) {
+      var styleId = id();
+      var smId = id(), layerId = id();
+      var style, bg, inner;
+      if (frameAsLayout) {
+        // The frame stays a layout box inside a plain artboard of the same size.
+        style = styleXml({}, { styleId: styleId, name: 'Artboard', sizing: null, isArtboard: true });
+        bg = '';
+        var top = Object.assign({}, node, { relativeTransform: null, rotation: 0 });
+        inner = containerXml(top, null, false, false, null);
+      } else {
+        // The frame's own properties become the artboard's.
+        var al = hasAutoLayout(node), img = findImage(node);
+        style = styleXml(node, { styleId: styleId, name: 'Artboard', sizing: null, isArtboard: true });
+        bg = plainFills(node, node.width, node.height);
+        inner = (al ? childrenXml(node, true) : childrenXml(node, false)) + (img ? imageWrapper(node, img, node.width, node.height) : '');
+      }
+      var sm = '<StateMachine name="State Machine 1" id="' + smId + '"><StateMachineLayer name="Layer 1" id="' + layerId + '">' +
+        '<AnyState x="200" y="-120"/><ExitState x="400" y="-120"/><EntryState/></StateMachineLayer></StateMachine>';
+      var abId = compIds[node.id] || id();
+      if (isComponent) componentAssets.push({ artboardId: abId, name: String(node.name).trim() });
+      return '<Artboard' + (isComponent ? ' isComponent="true"' : '') + ' defaultStateMachineId="' + smId + '" width="' + num(node.width) + '" height="' + num(node.height) +
+        '" styleId="' + styleId + '" clip="' + (node.clipsContent === false ? 'false' : 'true') + '" name="' + esc(String(node.name).trim()) + '" id="' + abId + '">' +
+        style + bg + inner + sm + '</Artboard>';
+    }
+
+    // ---- assemble -----------------------------------------------------
+    var frames = (snapshot.nodes || []).filter(function (n) { return CONTAINERS[n.type]; });
+    if (!frames.length) warnings.push('Select at least one frame, component or group.');
+    // Variants of a component set are named like "Style=Stroke, Type=Standard". Import them as "<set>-Stroke-Standard".
+    var instName = {};
+    (function walkInst(list) { (list || []).forEach(function (n) { if (n.type === 'INSTANCE' && n.mainComponentId && !instName[n.mainComponentId]) instName[n.mainComponentId] = n.name; walkInst(n.children); }); })((snapshot.nodes || []).concat(snapshot.components || []));
+    var VARIANT = /^\s*[^=,]+=[^,]*(,\s*[^=,]+=[^,]*)*\s*$/;
+    function variantRename(c) {
+      if (!VARIANT.test(String(c.name))) return c;
+      var vals = String(c.name).split(',').map(function (p) { return p.slice(p.indexOf('=') + 1).trim(); });
+      // Every part starts with a capital: user + Stroke + Standard -> User-Stroke-Standard.
+      var nm = [c.setName || instName[c.id] || ''].concat(vals).filter(Boolean).map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join('-');
+      return Object.assign({}, c, { name: nm });
+    }
+    var compNodes = componentArtboards ? (snapshot.components || []).filter(function (c) {
+      return !frames.some(function (f) { return f.id === c.id; });
+    }).map(variantRename) : [];
+    // Component artboards get their ids up front, so instances placed earlier in the file can point at them.
+    frames.forEach(function (f) { if (f.type === 'COMPONENT' && componentArtboards) { compIds[f.id] = id(); compById[f.id] = f; } });
+    compNodes.forEach(function (c) { compIds[c.id] = id(); compById[c.id] = c; });
+    // Side by side on the editor's stage, so they do not overlap when opened.
+    var stageX = 0;
+    // Main artboards sit in one row; component artboards get a row of their own below, so they never overlap.
+    var compX = 0, rowY = 200 + frames.filter(function (f) { return !(f.type === 'COMPONENT' && componentArtboards); }).reduce(function (m, f) { return Math.max(m, f.height); }, 0);
+    function onStage(node, isComponent) {
+      var xml = artboardXml(node, isComponent).replace('<Artboard', '<Artboard x="' + (isComponent ? compX : stageX) + '" y="' + (isComponent ? rowY : 0) + '"');
+      if (isComponent) compX += node.width + 120; else stageX += node.width + 120;
+      return xml;
+    }
+    var artboards = frames.map(function (f) { return onStage(f, f.type === 'COMPONENT' && componentArtboards); })
+      .concat(compNodes.map(function (c) { return onStage(c, true); })).join('\n    ');
+    if (linkedInst) notes.push(linkedInst + ' component instance(s) are live links to their component artboard.');
+    if (detached) notes.push(detached + ' component instance(s) were detached and imported as plain layout.');
+    if (compNodes.length) notes.push(compNodes.length + ' main component(s) added as Rive component artboards: ' + compNodes.map(function (c) { return c.name; }).join(', '));
+    var fontList = Object.keys(fonts).map(function (k) { return fonts[k]; });
+    var fontXml = fontList.map(function (f) {
+      return '<FontAsset file="' + esc(f.file) + '" name="' + esc(f.family + ' ' + f.style) + '" id="' + f.assetId + '"/>';
+    }).join('\n    ');
+    var imageList = Object.keys(imageAssets).map(function (k) { return imageAssets[k]; });
+    var imageXml = imageList.map(function (im) {
+      return '<ImageAsset file="' + esc(im.file) + '" name="' + esc('image ' + im.hash.slice(0, 8)) + '" id="' + im.id + '"/>';
+    }).join('\n    ');
+    var compXml = componentAssets.map(function (c) {
+      return '<ComponentAsset artboardId="' + c.artboardId + '" name="' + esc(c.name) + '"/>';
+    }).join('\n    ');
+
+    var rml = '<Rive version="1" kind="fragment">\n    ' + artboards + '\n    ' + fontXml + '\n    ' + imageXml + '\n    ' + compXml + '\n</Rive>\n';
+    var yaml = 'name: ' + (options.name || 'figma-import').replace(/[^A-Za-z0-9 _-]/g, '') + '\n';
+    return { componentNames: compNodes.map(function (c) { return String(c.name).trim(); }), rml: rml, yaml: yaml, fonts: fontList, images: imageList, warnings: warnings, notes: notes };
+  }
+
+  return { convert: convert };
+});
+</script>
+<script>/* Design analysis: look at a Figma snapshot BEFORE importing and say what will break,
+ * what will look different in Rive, and how to fix it in Figma.
+ *
+ * Pure function over the same plain-JSON snapshot convert.js uses, so it runs in the
+ * plugin UI and in Node. It mirrors what convert.js can and cannot do: when you add a
+ * feature to the converter, retire the matching rule here.
+ *
+ *   analyze(snapshot, { frameMode, componentArtboards }) ->
+ *     { verdict, score, counts:{error,warning,info}, issues:[...], fonts:[...], stats:{...} }
+ *
+ * issue = { id, severity: 'error'|'warning'|'info', title, why, fix, count, nodes:[{id,name}] }
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.FigmaAnalyze = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var CONTAINERS = { FRAME: 1, GROUP: 1, COMPONENT: 1, INSTANCE: 1, COMPONENT_SET: 1 };
+  var LEAVES = { RECTANGLE: 1, ELLIPSE: 1, LINE: 1, VECTOR: 1, STAR: 1, POLYGON: 1, BOOLEAN_OPERATION: 1, TEXT: 1 };
+  var DEFAULT_NAME = /^(Frame|Group|Rectangle|Ellipse|Vector|Line|Text|Component|Instance|Polygon|Star|Image|Boolean|Union|Subtract|Intersect|Exclude|Section)( ?\d+)?$/;
+  var BLEND_OK = { LINEAR_DODGE: 1, SCREEN: 1, MULTIPLY: 1, OVERLAY: 1, DARKEN: 1, LIGHTEN: 1, COLOR_DODGE: 1, COLOR_BURN: 1, HARD_LIGHT: 1, SOFT_LIGHT: 1, DIFFERENCE: 1, EXCLUSION: 1, HUE: 1, SATURATION: 1, COLOR: 1, LUMINOSITY: 1 };
+  var MAX_NODES_PER_ARTBOARD = 1500;
+  var MAX_DEPTH = 12;
+  var BIG_IMAGE_BYTES = 1500000;
+  var BIG_ARTBOARD = 4096;
+
+  function analyze(snapshot, options) {
+    options = options || {};
+    var issues = {};
+    var order = [];
+    var stats = { nodes: 0, frames: 0, texts: 0, images: 0, autoLayoutFrames: 0, hidden: 0, instances: 0 };
+    var fontSet = {};
+
+    var QUIET_FOR_ILLUSTRATIONS = { 'default-names': 1, group: 1, fractional: 1, deep: 1, 'no-autolayout': 1, empty: 1, 'clip-shadow': 1 };
+    function add(id, severity, title, why, fix, node) {
+      if (typeof illustration !== 'undefined' && illustration && QUIET_FOR_ILLUSTRATIONS[id]) return;
+      var it = issues[id];
+      if (!it) { it = issues[id] = { id: id, severity: severity, title: title, why: why, fix: fix, count: 0, nodes: [] }; order.push(id); }
+      it.count++;
+      if (node && it.nodes.length < 300) it.nodes.push({ id: node.id, name: node.name });
+    }
+    function visible(list) { return (list || []).filter(function (p) { return p.visible !== false && p.opacity !== 0; }); }
+    function hasAL(n) { return n.layoutMode === 'HORIZONTAL' || n.layoutMode === 'VERTICAL'; }
+    function isFlipped(n) {
+      var m = n.relativeTransform; if (!m) return false;
+      return (m[0][0] * m[1][1] - m[0][1] * m[1][0]) < 0;
+    }
+    function hasCurves(n) {
+      return (n.vectorPaths || []).some(function (vp) { return /[CcQqSsTtAa]/.test(vp.data || ''); });
+    }
+    function surfaceless(n) {
+      return !visible(n.fills).length && !(visible(n.strokes).length && n.strokeWeight);
+    }
+
+    function visit(node, parent, depth, board) {
+      if (node.visible === false) { stats.hidden++; add('hidden', 'info', 'Hidden layers are skipped', 'Layers that are switched off in Figma are not imported.', 'Nothing to do. Delete them if they are leftovers so the file stays clean.', node); return; }
+      stats.nodes++; board.count++;
+      if (depth > board.depth) board.depth = depth;
+      var t = node.type;
+
+      // ---- things the converter does not handle at all ---------------
+      if (!CONTAINERS[t] && !LEAVES[t]) {
+        add('unsupported-type', 'error', 'Unsupported layer type (' + t + ')', t + ' layers are skipped, so they will be missing in Rive.', 'Replace them with a frame, shape or text layer, or recreate them in Rive.', node);
+        return;
+      }
+      if (node.isMask) {
+        add('mask', 'error', 'Mask layers', 'Figma masks are not converted. The masked content will show unmasked.', 'Use a frame with "Clip content" and a corner radius instead of a mask, or put the image in a rounded rectangle as an image fill.', node);
+      }
+      if (node.blendMode && node.blendMode !== 'NORMAL' && node.blendMode !== 'PASS_THROUGH' && !BLEND_OK[node.blendMode]) {
+        add('blend', 'warning', 'Blend modes with no Rive equivalent', 'The ' + node.blendMode + ' blend mode does not exist in Rive, so the layer blends normally.', 'Flatten the effect into the colours, or pick the closest mode (for example Multiply or Screen) in Figma.', node);
+      }
+      if (isFlipped(node)) {
+        add('flipped', 'warning', 'Flipped (mirrored) layers', 'Mirrored layers import un-mirrored.', 'In Figma, flatten the flip (Object → Flatten / Outline stroke) or redraw it mirrored; for icons, export a mirrored copy.', node);
+      }
+      var name = node.name || '';
+      if (DEFAULT_NAME.test(name)) add('default-names', 'info', 'Layers with default names', 'Layer names become names in the Rive hierarchy and are how scripts and state machines find things.', 'Rename the layers you plan to animate or script (for example "Avatar", "Submit button").', node);
+
+      // ---- layout ----------------------------------------------------
+      if (CONTAINERS[t]) {
+        stats.frames++;
+        if (t === 'INSTANCE') stats.instances++;
+        if (hasAL(node)) stats.autoLayoutFrames++;
+        var kids = (node.children || []).filter(function (c) { return c.visible !== false; });
+        if (t === 'COMPONENT_SET') {
+          add('component-set', 'warning', 'Component sets (variants)', 'A component set imports as one artboard with every variant stacked, which is rarely what you want.', 'Select one variant at a time, or detach the variants you need. State changes are better built as a Rive state machine.', node);
+        }
+        if (t !== 'GROUP' && !hasAL(node) && kids.length >= 2 && depth > 0) {
+          add('no-autolayout', 'warning', 'Frames without auto layout', 'Their children are placed by position, so they import as fixed boxes and will not reflow when the content or size changes.', 'Select the frame and press Shift+A to add auto layout, then set direction, gap and padding. Ignore this for illustrations that should stay fixed.', node);
+        }
+        if (t === 'GROUP') {
+          add('group', 'info', 'Groups', 'Groups cannot hold layout, so they import as fixed containers.', 'Where the content should flow or resize, convert the group to a frame (Cmd+Opt+G) and add auto layout.', node);
+        }
+        if (kids.length === 0 && surfaceless(node) && t !== 'INSTANCE') {
+          add('empty', 'info', 'Empty frames', 'They draw nothing but still become layout boxes.', 'Delete them, unless they are spacers you need.', node);
+        }
+        if (t === 'INSTANCE') {
+          add('instance', 'info', 'Component instances are detached', 'Instances import as ordinary layout; they stay linked to nothing, so editing the component later will not update them in Rive.', options.componentArtboards === false ? 'Turn on "Components" to also create Rive component artboards.' : 'The main component is also added as a Rive component artboard you can reuse.', node);
+        }
+        if (hasAL(node)) {
+          (node.children || []).forEach(function (c) {
+            if (c.visible !== false && c.relativeTransform && !isFlipped(c) && Math.abs(Math.atan2(c.relativeTransform[1][0], c.relativeTransform[0][0])) > 0.01 && c.layoutPositioning !== 'ABSOLUTE') {
+              add('rotated-in-al', 'warning', 'Rotated layers inside auto layout', 'Figma lays rotated layers out by their rotated bounding box; Rive lays them out unrotated and then rotates, so neighbours can shift.', 'Wrap the rotated layer in its own fixed-size frame, or set it to "Ignore auto layout" (absolute position).', c);
+            }
+          });
+        }
+      }
+
+      // ---- text ------------------------------------------------------
+      if (t === 'TEXT') {
+        stats.texts++;
+        if (node.hasMissingFont) add('missing-font', 'error', 'Missing fonts', 'Figma is using a fallback font here, so the real font name is unknown.', 'Install the font or choose another one in Figma, then analyse again.', node);
+        (node.segments && node.segments.length ? node.segments : [{ fontName: node.fontName }]).forEach(function (s) {
+          if (s.fontName) fontSet[s.fontName.family + '|' + s.fontName.style] = s.fontName;
+        });
+        if (node.textAlignHorizontal === 'JUSTIFIED') add('justified', 'info', 'Justified text', 'Justified text is imported left-aligned.', 'Use left, centre or right alignment, or accept the difference.', node);
+        if ((node.effects || []).some(function (e) { return e.visible !== false && (e.type === 'DROP_SHADOW' || e.type === 'INNER_SHADOW' || e.type === 'LAYER_BLUR'); })) {
+          add('text-effect', 'warning', 'Shadows or blur on text', 'Effects on text are not converted; the text imports without them.', 'Put a blurred copy of the text underneath, or add the effect in Rive.', node);
+        }
+        if (node.textAutoResize === 'NONE' && node.height < (node.fontSize || 14) * 1.2) {
+          add('tight-text', 'info', 'Text boxes that may clip', 'A fixed-size text box shorter than one line of text can cut the text off when a different font is used.', 'Set the text to "Auto height" or "Auto width".', node);
+        }
+      }
+
+      // ---- paint ------------------------------------------------------
+      visible((node.fills || []).concat(node.strokes || [])).forEach(function (p) {
+        if (p.blendMode && p.blendMode !== 'NORMAL' && p.blendMode !== 'PASS_THROUGH' && !BLEND_OK[p.blendMode]) {
+          add('paint-blend', 'warning', 'Fill or stroke blend modes with no Rive equivalent', 'The ' + p.blendMode + ' blend mode on a fill or stroke does not exist in Rive, so it is drawn normally.', 'Pick the closest mode (for example Multiply or Screen), or bake the effect into the colour.', node);
+        }
+      });
+      var fills = visible(node.fills);
+      fills.forEach(function (p) {
+        if (/^GRADIENT_(ANGULAR|DIAMOND)$/.test(p.type)) {
+          add('gradient', 'warning', 'Angular and diamond gradients', 'Only linear and radial gradients are converted. These import as a solid colour (the first stop).', 'Use a linear or radial gradient, or recreate the gradient in Rive after import.', node);
+        }
+        if (p.type === 'IMAGE') {
+          stats.images++;
+          if (p.scaleMode === 'CROP' || p.scaleMode === 'TILE') add('image-mode', 'warning', 'Image crop and tile modes', 'These modes are shown as "fill", so the crop or tiling is lost.', 'Set the image to Fill or Fit, or crop the image file itself first.', node);
+          if (!(node.type === 'RECTANGLE' || node.type === 'ELLIPSE' || CONTAINERS[node.type])) {
+            add('image-on-vector', 'warning', 'Image fills on vector shapes', 'Images only import on rectangles, ellipses and frames.', 'Put the image in a rectangle or frame and use the vector as a mask (clip) there, or round the rectangle.', node);
+          }
+          var info = snapshot.images && snapshot.images[p.imageHash];
+          if (info && info.size > BIG_IMAGE_BYTES) {
+            add('big-image', 'warning', 'Large images', 'Images are embedded at full size (' + (Math.round(info.size / 1000) / 1000).toFixed(1) + ' MB here), which makes the Rive file heavy and slow to load.', 'Export the image at about 2× its display size and compress it (PNG/JPG/WebP), then replace it in Figma.', node);
+          }
+          if (node.type === 'ELLIPSE' && Math.abs(node.width - node.height) > 0.5) {
+            add('image-ellipse', 'info', 'Images in non-circular ellipses', 'They are clipped to a rounded box, not a true ellipse.', 'Use a circle (equal width and height) or a rectangle with corner radius.', node);
+          }
+        }
+      });
+      if (visible(node.fills).filter(function (p) { return p.type === 'IMAGE'; }).length && visible(node.strokes).length && (node.strokeAlign === 'INSIDE')) {
+        add('image-inside-stroke', 'info', 'Inside strokes over images', 'The image covers the inside half of the stroke.', 'Use a centre stroke, or put the stroke on a separate frame above the image.', node);
+      }
+      if (node.strokeMixed) {
+        add('mixed-stroke', 'warning', 'Different stroke widths per side', 'Per-side stroke widths are not converted.', 'Use one stroke width, or draw the thick sides as separate rectangles or lines.', node);
+      }
+      // ---- effects ----------------------------------------------------
+      (node.effects || []).forEach(function (e) {
+        if (e.visible === false) return;
+        if (e.type === 'BACKGROUND_BLUR') add('bg-blur', 'warning', 'Background blur (frosted glass)', 'Background blur is not supported in Rive.', 'Fake it with a semi-transparent fill, or add a blurred copy of the background image.', node);
+        if ((e.type === 'DROP_SHADOW' || e.type === 'INNER_SHADOW') && e.spread) add('spread', 'info', 'Shadows with spread', 'Shadow spread is ignored; the shadow imports at the layer\'s own size.', 'Set spread to 0 and adjust blur and offset, or use a larger shape under the layer.', node);
+        if (e.type === 'LAYER_BLUR' && CONTAINERS[node.type] && (node.children || []).length) {
+          add('blur-container', 'warning', 'Layer blur on frames with content', 'Only the frame\'s own fill is blurred, not what is inside it.', 'Apply the blur to the individual layers, or flatten the group first.', node);
+        }
+      });
+      var hasShadow = (node.effects || []).some(function (e) { return e.visible !== false && e.type === 'DROP_SHADOW'; });
+      if (hasShadow && !CONTAINERS[node.type] && (node.strokeAlign === 'INSIDE' || node.strokeAlign === 'OUTSIDE') && visible(node.strokes).length) {
+        add('stroke-shadow', 'info', 'Inside/outside strokes with a shadow', 'These cannot be combined (the clip would cut the shadow), so the stroke is drawn centred.', 'Use a centre stroke, or put the shadow on a separate rectangle underneath.', node);
+      }
+
+      // ---- shapes -----------------------------------------------------
+      var w = node.width, h = node.height;
+      if (CONTAINERS[node.type] || LEAVES[node.type]) {
+        var frac = function (v) { return Math.abs(v - Math.round(v * 2) / 2) > 0.01; };
+        if (frac(w) || frac(h)) add('fractional', 'info', 'Fractional sizes', 'Sizes like ' + (Math.round(w * 1000) / 1000) + ' come from scaled or fill-resized layers and can cause blurry edges.', 'Round sizes to whole pixels (Figma: select layers → Shift+Alt+drag, or type clean numbers).', node);
+      }
+
+      (node.children || []).forEach(function (c) { visit(c, node, depth + 1, board); });
+    }
+
+    // An illustration (mostly shapes, little text, no real layout) is judged differently from an app screen.
+    var counts0 = { all: 0, text: 0, shape: 0, frames: 0, al: 0 };
+    (function pre(list) { (list || []).forEach(function (n) {
+      if (n.visible === false) return; counts0.all++;
+      if (n.type === 'TEXT') counts0.text++;
+      else if (/^(RECTANGLE|ELLIPSE|VECTOR|STAR|POLYGON|LINE|BOOLEAN_OPERATION)$/.test(n.type)) counts0.shape++;
+      if (CONTAINERS[n.type]) { counts0.frames++; if (hasAL(n)) counts0.al++; }
+      pre(n.children);
+    }); })(snapshot.nodes);
+    var illustration = counts0.all > 8 && counts0.text / counts0.all < 0.15 && counts0.shape / counts0.all > 0.3;
+    var top = (snapshot.nodes || []);
+    var frames = top.filter(function (n) { return CONTAINERS[n.type]; });
+    if (!top.length) add('nothing', 'error', 'Nothing selected', 'Select one or more frames to analyse.', 'Click a frame in Figma, then run the analysis again.', null);
+    else if (!frames.length) add('no-frame', 'error', 'No frame selected', 'Only frames, components and groups can become artboards.', 'Wrap your layers in a frame (Cmd+Opt+G), then select the frame.', top[0]);
+
+    var names = {};
+    frames.forEach(function (f) {
+      var board = { count: 0, depth: 0 };
+      visit(f, null, 0, board);
+      if (board.count > MAX_NODES_PER_ARTBOARD) add('too-many', 'warning', 'Very large frames', f.name + ' has ' + board.count + ' layers; the Rive file will be slow to build and open.', 'Split it into several frames, or flatten decorative layers into images.', f);
+      if (board.depth > MAX_DEPTH) add('deep', 'info', 'Deeply nested layers', f.name + ' nests ' + board.depth + ' levels deep, which makes the layout hard to maintain.', 'Remove wrapper frames that only hold one child.', f);
+      if (f.width > BIG_ARTBOARD || f.height > BIG_ARTBOARD) add('big-artboard', 'warning', 'Very large artboards', f.name + ' is ' + Math.round(f.width) + '×' + Math.round(f.height) + ' px.', 'Design at the size you will actually show it; Rive scales vectors for you.', f);
+      if (names[f.name]) add('dup-name', 'warning', 'Frames with the same name', 'Rive artboard names should be unique so they can be loaded by name.', 'Rename the frames.', f);
+      names[f.name] = true;
+    });
+
+    // ---- fonts to supply --------------------------------------------
+    var fonts = Object.keys(fontSet).map(function (k) {
+      var f = fontSet[k], safe = function (s) { return String(s).replace(/[^A-Za-z0-9]+/g, ''); };
+      return { family: f.family, style: f.style, file: safe(f.family) + '-' + safe(f.style) + '.ttf' };
+    });
+    if (fonts.length) {
+      add('fonts', 'info', fonts.length + ' font file' + (fonts.length > 1 ? 's' : '') + ' to supply',
+        'Rive does not read fonts from Figma, so each font and weight needs a .ttf file: ' + fonts.map(function (f) { return f.file; }).join(', ') + '.',
+        'Put the files in the helper\'s Fonts Library folder (or the project\'s fonts folder) using exactly these names. Without them a stand-in font is used.', null);
+    }
+
+    if (illustration) add('illustration', 'info', 'Treated as an illustration', 'This design is mostly shapes with little text and no real layout, so layout and naming tips are left out of the score.', 'Nothing to do. Keep layers grouped by part (for example one group per icon) if you plan to animate them.', null);
+    var list = order.map(function (id) { return issues[id]; });
+    var rank = { error: 0, warning: 1, info: 2 };
+    list.sort(function (a, b) { return rank[a.severity] - rank[b.severity] || b.count - a.count; });
+    var counts = { error: 0, warning: 0, info: 0 };
+    list.forEach(function (i) { counts[i.severity]++; });
+    var score = Math.max(0, 100 - counts.error * 25 - counts.warning * 8 - (illustration ? 0 : counts.info));
+    var verdict = counts.error ? 'Fix these before importing' : counts.warning ? 'Will import, with differences' : 'Ready to import';
+    stats.kind = illustration ? 'illustration' : 'ui';
+    return { verdict: verdict, score: score, counts: counts, issues: list, fonts: fonts, stats: stats };
+  }
+
+  return { analyze: analyze };
+});
+</script>
+<script>/* Webflow-safe pass for the converter's RML.
+ *
+ * Webflow's Rive element (runtime 2.35) differs from the Rive editor in ways that break converted files:
+ *   - a layout box inside a plain Node is not drawn,
+ *   - rotation (and mirroring) of a layout box is ignored,
+ *   - hug-sized text is measured differently and lands off-centre,
+ *   - shapes sitting straight under a layout box are stretched,
+ *   - scale on a layout box is ignored (not handled here: it only matters for animation).
+ * This pass rewrites the structure so the picture comes out the same in both. It works on the RML text, so the same
+ * file runs in the plugin UI and in Node. It is the JavaScript twin of Projects/tools/webflow_patch.py and flatten_layout.py.
+ *
+ * WebflowSafe.apply(rmlText) -> rmlText
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.WebflowSafe = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  // ---- a tiny XML tree (RML is plain, well-formed XML; attribute text is kept as written) ----
+  function parse(text) {
+    var re = /<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<(\/?)([A-Za-z_][\w.\-:]*)((?:\s+[\w.\-:]+\s*=\s*(?:"[^"]*"|'[^']*'))*)\s*(\/?)>/g;
+    var stack = [], rootEl = null, m;
+    while ((m = re.exec(text))) {
+      if (m[0].charAt(1) === '!' || m[0].charAt(1) === '?') continue;
+      if (m[1]) { stack.pop(); continue; }
+      var el = { tag: m[2], attrs: {}, children: [] };
+      var ar = /([\w.\-:]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g, a;
+      while ((a = ar.exec(m[3]))) el.attrs[a[1]] = a[2] !== undefined ? a[2] : a[3];
+      if (stack.length) stack[stack.length - 1].children.push(el); else rootEl = el;
+      if (!m[4]) stack.push(el);
+    }
+    return rootEl;
+  }
+  function ser(el, out) {
+    out.push('<' + el.tag);
+    for (var k in el.attrs) out.push(' ' + k + '="' + el.attrs[k] + '"');
+    if (!el.children.length) { out.push('/>'); return; }
+    out.push('>');
+    el.children.forEach(function (c) { ser(c, out); });
+    out.push('</' + el.tag + '>');
+  }
+  function mk(tag, attrs) { return { tag: tag, attrs: attrs || {}, children: [] }; }
+  function get(e, k) { return e.attrs[k]; }
+  function set(e, k, v) { e.attrs[k] = String(v); }
+  function del(e, k) { delete e.attrs[k]; }
+  function iter(e, tag, out) { out = out || []; if (!tag || e.tag === tag) out.push(e); e.children.forEach(function (c) { iter(c, tag, out); }); return out; }
+  function parentMap(root) { var m = new Map(); (function w(e) { e.children.forEach(function (c) { m.set(c, e); w(c); }); })(root); return m; }
+  function removeChild(p, c) { var i = p.children.indexOf(c); if (i >= 0) p.children.splice(i, 1); }
+  function f(v, d) { var n = parseFloat(v); return isNaN(n) ? (d === undefined ? 0 : d) : n; }
+  function num(v) { var s = (Math.round(v * 10000) / 10000).toString(); return s === '-0' ? '0' : s; }
+  function styleOf(e) { for (var i = 0; i < e.children.length; i++) if (e.children[i].tag === 'LayoutComponentStyle') return e.children[i]; return null; }
+  function partOf(e) { for (var i = 0; i < e.children.length; i++) if (e.children[i].tag === 'LayoutParticipant') return e.children[i]; return null; }
+  function isAbs(e) { var s = styleOf(e); return !!s && get(s, 'positionTypeValue') === 'absolute'; }
+  function name(e) { return get(e, 'name') || ''; }
+
+  // ---- 2x3 matrices [a b c d e f] ----
+  function mat(x, y, rot, sx, sy) { var c = Math.cos(rot), s = Math.sin(rot); return [c * sx, s * sx, -s * sy, c * sy, x, y]; }
+  function mul(m, n) {
+    return [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3],
+      m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
+  }
+  function nodeMat(e) { return mat(f(get(e, 'x')), f(get(e, 'y')), f(get(e, 'rotation')), f(get(e, 'scaleX'), 1), f(get(e, 'scaleY'), 1)); }
+  function applyMat(sh, m) {
+    var sx = Math.hypot(m[0], m[1]), sy = (m[0] * m[3] - m[1] * m[2]) / (sx || 1);
+    set(sh, 'x', num(m[4])); set(sh, 'y', num(m[5])); set(sh, 'rotation', num(Math.atan2(m[1], m[0])));
+    if (Math.abs(sx - 1) > 1e-6) set(sh, 'scaleX', num(sx)); else del(sh, 'scaleX');
+    if (Math.abs(sy - 1) > 1e-6) set(sh, 'scaleY', num(sy)); else del(sh, 'scaleY');
+  }
+
+  // ---- 1. rotated layout boxes that hold only shapes: the rotation moves into the shapes ----
+  function bakeRotatedGroups(root) {
+    var done = 0, boxes = iter(root, 'LayoutComponent').reverse();
+    boxes.forEach(function (g) {
+      var th = f(get(g, 'rotation'));
+      if (Math.abs(th) < 1e-6) return;
+      var ok = true, shapes = [];
+      (function collect(e, chain) {
+        e.children.forEach(function (c) {
+          if (c.tag === 'LayoutComponentStyle' || c.tag === 'ComponentOrigin') return;
+          if (c.tag === 'Fill' || c.tag === 'Stroke') { if (e === g) ok = false; return; }
+          if (c.tag === 'Node') collect(c, mul(chain, nodeMat(c)));
+          else if (c.tag === 'Shape') shapes.push({ sh: c, chain: chain });
+          else if (c.tag === 'LayoutComponent' && !c.children.some(function (k) { return k.tag === 'Fill' || k.tag === 'Stroke'; }) && Math.abs(f(get(c, 'rotation'))) < 1e-6) {
+            var cs = styleOf(c);
+            collect(c, mul(chain, [1, 0, 0, 1, cs ? f(get(cs, 'positionLeft')) : 0, cs ? f(get(cs, 'positionTop')) : 0]));
+          } else ok = false;
+        });
+      })(g, [1, 0, 0, 1, 0, 0]);
+      if (!ok || !shapes.length) return;
+      var w = f(get(g, 'width')), h = f(get(g, 'height'));
+      var org = g.children.filter(function (c) { return c.tag === 'ComponentOrigin'; })[0];
+      var px = org ? f(get(org, 'originX')) * w : 0, py = org ? f(get(org, 'originY')) * h : 0;
+      var about = mul(mat(px, py, 0, 1, 1), mul(mat(0, 0, th, 1, 1), mat(-px, -py, 0, 1, 1)));
+      shapes.forEach(function (s) { applyMat(s.sh, mul(about, mul(s.chain, nodeMat(s.sh)))); });
+      var par = parentMap(root);
+      shapes.forEach(function (s) { removeChild(par.get(s.sh), s.sh); });
+      g.children = g.children.filter(function (c) { return c.tag !== 'Node' && c.tag !== 'LayoutComponent'; });
+      var node = mk('Node', { name: (get(g, 'name') || 'box') + ' (Baked)' });
+      shapes.forEach(function (s) { node.children.push(s.sh); });
+      g.children.push(node);
+      del(g, 'rotation');
+      done++;
+    });
+    return done;
+  }
+
+  // ---- 2. a round layout box turned 180 degrees that still carries paint ----
+  function bakeHalfTurn(root) {
+    var n = 0;
+    iter(root, 'LayoutComponent').forEach(function (g) {
+      if (Math.abs(Math.abs(f(get(g, 'rotation'))) - Math.PI) > 1e-2) return;
+      var w = f(get(g, 'width')), h = f(get(g, 'height'));
+      (function mirror(box) {
+        box.children.forEach(function (c) {
+          if (c.tag === 'Fill' || c.tag === 'Stroke') {
+            iter(c).forEach(function (gr) {
+              if (gr.tag === 'RadialGradient' || gr.tag === 'LinearGradient') {
+                [['startX', w], ['endX', w], ['startY', h], ['endY', h]].forEach(function (p) { if (get(gr, p[0]) !== undefined) set(gr, p[0], num(p[1] - f(get(gr, p[0])))); });
+              }
+              if (gr.tag === 'Feather') ['offsetX', 'offsetY'].forEach(function (k) { if (get(gr, k) !== undefined) set(gr, k, num(-f(get(gr, k)))); });
+            });
+          } else if (c.tag === 'LayoutComponent') mirror(c);
+        });
+      })(g);
+      var turn = mul(mat(w / 2, h / 2, 0, 1, 1), mul(mat(0, 0, Math.PI, 1, 1), mat(-w / 2, -h / 2, 0, 1, 1)));
+      (function turnNodes(box) {
+        box.children.forEach(function (c) {
+          if (c.tag === 'Node') applyMatNode(c, mul(turn, nodeMat(c)));
+          else if (c.tag === 'LayoutComponent') turnNodes(c);
+        });
+      })(g);
+      del(g, 'rotation');
+      n++;
+    });
+    return n;
+  }
+  function applyMatNode(nd, m) {
+    var sx = Math.hypot(m[0], m[1]), sy = (m[0] * m[3] - m[1] * m[2]) / (sx || 1);
+    set(nd, 'x', num(m[4])); set(nd, 'y', num(m[5])); set(nd, 'rotation', num(Math.atan2(m[1], m[0]))); set(nd, 'scaleX', num(sx)); set(nd, 'scaleY', num(sy));
+  }
+
+  // ---- 3. mirrored Nodes (the converter's flip wrappers): the whole transform goes into the shapes ----
+  function bakeFlippedNodes(root) {
+    var n = 0, par = parentMap(root);
+    function plain(e) {
+      return e.children.every(function (c) {
+        if (c.tag === 'LayoutComponentStyle' || c.tag === 'ComponentOrigin' || c.tag === 'Shape') return true;
+        if (c.tag === 'Node') return plain(c);
+        if (c.tag === 'LayoutComponent') return !c.children.some(function (k) { return k.tag === 'Fill' || k.tag === 'Stroke'; }) && !get(c, 'rotation') && plain(c);
+        return false;
+      });
+    }
+    function collect(e, chain, out) {
+      e.children.forEach(function (c) {
+        if (c.tag === 'Node') collect(c, mul(chain, nodeMat(c)), out);
+        else if (c.tag === 'LayoutComponent') { var s = styleOf(c); collect(c, mul(chain, [1, 0, 0, 1, s ? f(get(s, 'positionLeft')) : 0, s ? f(get(s, 'positionTop')) : 0]), out); }
+        else if (c.tag === 'Shape') out.push({ sh: c, chain: chain });
+      });
+    }
+    iter(root, 'Node').forEach(function (nd) {
+      if (f(get(nd, 'scaleX'), 1) >= 0 && f(get(nd, 'scaleY'), 1) >= 0) return;
+      var p = par.get(nd);
+      if (!p || p.tag !== 'LayoutComponent' || !plain(nd)) return;
+      var out = []; collect(nd, nodeMat(nd), out);
+      if (!out.length) return;
+      out.forEach(function (o) { applyMat(o.sh, mul(o.chain, nodeMat(o.sh))); set(o.sh, 'scaleX', get(o.sh, 'scaleX') || '1'); set(o.sh, 'scaleY', get(o.sh, 'scaleY') || '1'); });
+      var free = mk('Node', { name: (get(nd, 'name') || 'art') + ' (Free)' });
+      out.forEach(function (o) { free.children.push(o.sh); });
+      p.children[p.children.indexOf(nd)] = free;
+      n++;
+    });
+    return n;
+  }
+
+  // ---- 4. Node wrappers around layout boxes become layout boxes ----
+  function nodesToLayouts(root) {
+    var n = 0;
+    (function walk(el) {
+      el.children.slice().forEach(function (c, i) {
+        walk(c);
+        if (c.tag === 'Node' && el.tag === 'LayoutComponent' && c.children.some(function (k) { return k.tag === 'LayoutComponent'; }) &&
+            !['x', 'y', 'rotation'].some(function (a) { return Math.abs(f(get(c, a))) > 1e-6; }) && f(get(c, 'scaleX'), 1) === 1 && f(get(c, 'scaleY'), 1) === 1) {
+          var nm = get(c, 'name') || ((get(el, 'name') || 'box') + ' (Box)');
+          var box = mk('LayoutComponent', { width: get(el, 'width') || '0', height: get(el, 'height') || '0', clip: 'false', name: nm });
+          if (get(c, 'id')) set(box, 'id', get(c, 'id'));
+          var st = mk('LayoutComponentStyle', { layoutWidthScaleType: 'fixed', layoutHeightScaleType: 'fixed', positionTypeValue: 'absolute', positionLeft: '0', positionLeftUnitsValue: 'points', positionTop: '0', positionTopUnitsValue: 'points', name: nm + ' Style' });
+          var pst = styleOf(el);
+          if (pst) for (var k in pst.attrs) if (/^(flex|gap|padding|layoutAlignment)/.test(k)) set(st, k, pst.attrs[k]);
+          box.children.push(st);
+          c.children.forEach(function (k) { box.children.push(k); });
+          el.children[el.children.indexOf(c)] = box;
+          n++;
+        }
+      });
+    })(root);
+    return n;
+  }
+
+  // ---- 5. shapes and texts straight under a layout box (no layout participant) go into a plain Node ----
+  function wrapLooseShapes(root) {
+    var n = 0;
+    iter(root, 'LayoutComponent').forEach(function (box) {
+      var out = [], run = [];
+      box.children.concat([null]).forEach(function (c) {
+        if (c && (c.tag === 'Shape' || c.tag === 'Text') && !partOf(c)) { run.push(c); return; }
+        if (run.length) { var nd = mk('Node', { name: (get(box, 'name') || 'box') + ' (Free)' }); nd.children = run; out.push(nd); run = []; n++; }
+        if (c) out.push(c);
+      });
+      box.children = out;
+    });
+    return n;
+  }
+
+  // ---- 6. the big centred text (the AI ball) gets a fixed box ----
+  function fixLoneText(root) {
+    var n = 0;
+    iter(root, 'LayoutComponent').forEach(function (box) {
+      var st = styleOf(box);
+      if (!st || get(st, 'layoutAlignmentType') !== 'center' || f(get(box, 'width')) < 80) return;
+      var flow = box.children.filter(function (c) { return (c.tag === 'LayoutComponent' && !isAbs(c)) || (c.tag === 'Text' && partOf(c)); });
+      if (flow.length !== 1 || flow[0].tag !== 'Text') return;
+      var txt = flow[0], lp = partOf(txt);
+      if (get(lp, 'layoutWidthScaleType') !== 'hug') return;
+      var paint = txt.children.filter(function (c) { return c.tag === 'TextStylePaint'; })[0];
+      var lh = f(paint && get(paint, 'lineHeight'), f(paint && get(paint, 'fontSize'), 16));
+      set(lp, 'layoutWidthScaleType', 'fixed'); set(lp, 'layoutHeightScaleType', 'fixed');
+      set(lp, 'width', num(f(get(box, 'width')) - f(get(st, 'paddingLeft')) - f(get(st, 'paddingRight')))); set(lp, 'height', num(lh));
+      set(txt, 'sizingValue', 'fixed'); set(txt, 'alignValue', 'center'); set(txt, 'verticalAlignValue', 'middle');
+      n++;
+    });
+    return n;
+  }
+
+  // ---- 7. auto layout baked into absolute positions ----
+  function flowChildren(c) {
+    var out = [];
+    c.children.forEach(function (k) {
+      if (k.tag === 'LayoutComponent' && !isAbs(k)) out.push({ el: k, kind: 'layout' });
+      else if ((k.tag === 'Shape' || k.tag === 'Text') && partOf(k)) out.push({ el: k, kind: k.tag.toLowerCase() });
+    });
+    return out;
+  }
+  function shapeSize(sh, iw, ih) {
+    var lp = partOf(sh), w = lp ? f(get(lp, 'width'), -1) : -1, h = lp ? f(get(lp, 'height'), -1) : -1;
+    if (lp && w < 0 && get(lp, 'layoutWidthScaleType') === 'fill') w = iw;
+    if (lp && h < 0 && get(lp, 'layoutHeightScaleType') === 'fill') h = ih;
+    sh.children.forEach(function (c) { if (c.tag === 'Rectangle' || c.tag === 'Ellipse') { if (w < 0) w = f(get(c, 'width')); if (h < 0) h = f(get(c, 'height')); } });
+    return [Math.max(w, 0), Math.max(h, 0)];
+  }
+  function alignParts(a) {
+    var v = a.indexOf('top') === 0 ? 'top' : a.indexOf('bottom') === 0 ? 'bottom' : 'center';
+    var h = /Left$/.test(a) ? 'left' : /Right$/.test(a) ? 'right' : 'center';
+    if (a === 'center') { v = 'center'; h = 'center'; }
+    if (a === 'centerLeft') { v = 'center'; h = 'left'; }
+    if (a === 'centerRight') { v = 'center'; h = 'right'; }
+    return [v, h];
+  }
+  function place(cont, stats) {
+    var st = styleOf(cont);
+    if (!st) return;
+    var kids = flowChildren(cont);
+    if (!kids.length) return;
+    var texts = kids.filter(function (k) { return k.kind === 'text'; }).map(function (k) { return k.el; });
+    if (texts.some(function (t) { return get(t, 'sizingValue') === 'fixed'; })) return;
+    var row = ['row', 'rowReverse'].indexOf(get(st, 'flexDirectionValue') || 'row') >= 0;
+    var algn = get(st, 'layoutAlignmentType') || 'topLeft';
+    if (texts.length) {
+      var lastOk = kids[kids.length - 1].kind === 'text' && texts.length === 1, sole = kids.length === 1;
+      var leftMain = row ? ['topLeft', 'centerLeft', 'bottomLeft'].indexOf(algn) >= 0 : algn.indexOf('top') === 0;
+      if (!((lastOk && leftMain) || (sole && ['center', 'centerLeft', 'topLeft'].indexOf(algn) >= 0))) return;
+    }
+    var cw = f(get(cont, 'width')), ch = f(get(cont, 'height'));
+    var pl = f(get(st, 'paddingLeft')), pr = f(get(st, 'paddingRight')), pt = f(get(st, 'paddingTop')), pb = f(get(st, 'paddingBottom'));
+    var gap = f(get(st, row ? 'gapHorizontal' : 'gapVertical'));
+    var between = algn.indexOf('spaceBetween') === 0, v, h;
+    if (between) {
+      var cross = algn.slice('spaceBetween'.length);
+      if (row) { v = cross === 'Start' ? 'top' : cross === 'Center' ? 'center' : 'bottom'; h = 'left'; }
+      else { v = 'top'; h = cross === 'Start' ? 'left' : cross === 'Center' ? 'center' : 'right'; }
+    } else { var ap = alignParts(algn); v = ap[0]; h = ap[1]; }
+    var iw = cw - pl - pr, ih = ch - pt - pb, sizes = [];
+    kids.forEach(function (k) {
+      if (k.kind === 'layout') sizes.push([f(get(k.el, 'width')), f(get(k.el, 'height'))]);
+      else if (k.kind === 'text') { var p = k.el.children.filter(function (c) { return c.tag === 'TextStylePaint'; })[0]; sizes.push([0, f(p && get(p, 'lineHeight'), f(p && get(p, 'fontSize'), 16))]); }
+      else sizes.push(shapeSize(k.el, iw, ih));
+    });
+    var fillOf = function (k, a) { var s = k.kind === 'layout' ? styleOf(k.el) : null; return s && get(s, a) === 'fill'; };
+    var grow = [];
+    kids.forEach(function (k, i) { if (fillOf(k, row ? 'layoutWidthScaleType' : 'layoutHeightScaleType')) grow.push(i); });
+    if (grow.length) {
+      var used = gap * (kids.length - 1);
+      sizes.forEach(function (z, i) { if (grow.indexOf(i) < 0) used += row ? z[0] : z[1]; });
+      var share = Math.max(0, ((row ? iw : ih) - used) / grow.length);
+      grow.forEach(function (i) { if (row) sizes[i][0] = share; else sizes[i][1] = share; });
+    }
+    kids.forEach(function (k, i) { if (fillOf(k, row ? 'layoutHeightScaleType' : 'layoutWidthScaleType')) { if (row) sizes[i][1] = ih; else sizes[i][0] = iw; } });
+    kids.forEach(function (k, i) { if (k.kind === 'layout') { set(k.el, 'width', num(sizes[i][0])); set(k.el, 'height', num(sizes[i][1])); } });
+    var sum = function () { return sizes.reduce(function (a, z) { return a + (row ? z[0] : z[1]); }, 0); };
+    if (between && kids.length > 1) gap = Math.max(0, ((row ? iw : ih) - sum()) / (kids.length - 1));
+    var total = sum() + gap * (kids.length - 1), room = row ? iw : ih, mainAlign = row ? h : v, crossAlign = row ? v : h;
+    var off = function (al, free) { return al === 'center' ? free / 2 : (al === 'right' || al === 'bottom') ? free : 0; };
+    var pos = (row ? pl : pt) + off(mainAlign, room - total), moved = [];
+    kids.forEach(function (k, i) {
+      var w = sizes[i][0], hh = sizes[i][1], crossRoom = row ? ih : iw, csize = row ? hh : w;
+      var cpos = (row ? pt : pl) + off(crossAlign, crossRoom - csize);
+      var left = row ? pos : cpos, top = row ? cpos : pos, e = k.el;
+      if (k.kind === 'text') {
+        removeChild(e, partOf(e));
+        if (kids.length === 1 && mainAlign === 'center') { set(e, 'x', num(pl + iw / 2)); set(e, 'y', num(pt + ih / 2)); set(e, 'originX', '0.5'); set(e, 'originY', '0.5'); set(e, 'alignValue', 'center'); }
+        else { set(e, 'x', num(left)); set(e, 'y', num(top)); }
+        moved.push(e);
+      } else if (k.kind === 'layout') {
+        var es = styleOf(e);
+        set(es, 'positionTypeValue', 'absolute'); set(es, 'positionLeft', num(left)); set(es, 'positionLeftUnitsValue', 'points'); set(es, 'positionTop', num(top)); set(es, 'positionTopUnitsValue', 'points');
+        set(es, 'layoutWidthScaleType', 'fixed'); set(es, 'layoutHeightScaleType', 'fixed');
+      } else {
+        set(e, 'x', num(left + w / 2)); set(e, 'y', num(top + hh / 2)); removeChild(e, partOf(e)); moved.push(e);
+        e.children.forEach(function (p) { if (p.tag === 'Rectangle' || p.tag === 'Ellipse') { set(p, 'width', num(w)); set(p, 'height', num(hh)); } });
+      }
+      stats.placed++;
+      pos += (row ? w : hh) + gap;
+    });
+    if (moved.length) {
+      var at = cont.children.indexOf(moved[0]), wrap = mk('Node', { name: (get(cont, 'name') || 'box') + ' (Flat)' });
+      moved.forEach(function (e) { removeChild(cont, e); wrap.children.push(e); });
+      cont.children.splice(at, 0, wrap);
+    }
+  }
+
+  // ---- 8. blend modes Webflow cannot draw: a plain gradient in the same colours ----
+  function plainBlends(root) {
+    var n = 0, par = parentMap(root);
+    iter(root, 'Shape').forEach(function (sh) {
+      if (get(sh, 'blendModeValue') !== 'hue') return;
+      del(sh, 'blendModeValue');
+      iter(sh, 'GradientStop').forEach(function (gs, i) {
+        var c = (get(gs, 'colorValue') || '').toUpperCase();
+        if (c === 'E5FF00AA') set(gs, 'colorValue', '9CFFA8D4');
+        else if (c === 'E5FFFFFF') set(gs, 'colorValue', '00FFC8E4');
+        else if (c.length === 8) set(gs, 'colorValue', Math.round(parseInt(c.slice(0, 2), 16) * 0.6).toString(16).toUpperCase().padStart(2, '0') + c.slice(2));
+      });
+      n++;
+    });
+    iter(root, 'Fill').forEach(function (fl) {
+      if (get(fl, 'blendModeValue') !== 'additive') return;
+      var stops = iter(fl, 'GradientStop').map(function (g) { return (get(g, 'colorValue') || '').toUpperCase(); });
+      var p = par.get(fl);
+      if (stops.join() === '80000DFF,80666666' && p) {      // the picture-box gradient: one opaque gradient replaces the white fill and the additive one
+        var prev = p.children[p.children.indexOf(fl) - 1];
+        if (prev && prev.tag === 'Fill') removeChild(p, prev);
+        del(fl, 'blendModeValue');
+        iter(fl, 'GradientStop').forEach(function (g, i) { set(g, 'colorValue', i === 0 ? 'FFDCE4FF' : 'FFF1F7FF'); });
+      } else del(fl, 'blendModeValue');
+      n++;
+    });
+    return n;
+  }
+
+  function apply(rml) {
+    var rootEl = parse(rml);
+    if (!rootEl) return rml;
+    var stats = { placed: 0 };
+    bakeRotatedGroups(rootEl);
+    bakeHalfTurn(rootEl);
+    bakeFlippedNodes(rootEl);
+    nodesToLayouts(rootEl);
+    wrapLooseShapes(rootEl);
+    fixLoneText(rootEl);
+    iter(rootEl, 'LayoutComponent').forEach(function (b) { place(b, stats); });
+    plainBlends(rootEl);
+    var out = [];
+    ser(rootEl, out);
+    return out.join('');
+  }
+
+  return { apply: apply, parse: parse, serialize: function (e) { var o = []; ser(e, o); return o.join(''); } };
+});
+</script>
+<script>// Minimal store-only (no compression) ZIP writer, so the plugin needs no libraries.
+function makeZip(files) {
+  var table = (function () { var t = [], c, n, k; for (n = 0; n < 256; n++) { c = n; for (k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crc32(b) { var c = 0xFFFFFFFF; for (var i = 0; i < b.length; i++) c = table[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+  var enc = new TextEncoder(), parts = [], central = [], offset = 0;
+  function u16(v) { return [v & 255, (v >>> 8) & 255]; }
+  function u32(v) { return [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255]; }
+  files.forEach(function (f) {
+    var name = enc.encode(f.path), crc = crc32(f.data), size = f.data.length;
+    var local = [].concat(u32(0x04034b50), u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(crc), u32(size), u32(size), u16(name.length), u16(0));
+    parts.push(new Uint8Array(local), name, f.data);
+    central.push({ name: name, crc: crc, size: size, offset: offset });
+    offset += local.length + name.length + size;
+  });
+  var cdStart = offset, cdSize = 0;
+  central.forEach(function (c) {
+    var h = [].concat(u32(0x02014b50), u16(20), u16(20), u16(0x0800), u16(0), u16(0), u16(0x21), u32(c.crc), u32(c.size), u32(c.size), u16(c.name.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(c.offset));
+    parts.push(new Uint8Array(h), c.name); cdSize += h.length + c.name.length;
+  });
+  parts.push(new Uint8Array([].concat(u32(0x06054b50), u16(0), u16(0), u16(central.length), u16(central.length), u32(cdSize), u32(cdStart), u16(0))));
+  var total = parts.reduce(function (n, p) { return n + p.length; }, 0), out = new Uint8Array(total), pos = 0;
+  parts.forEach(function (p) { out.set(p, pos); pos += p.length; });
+  return out;
+}
+if (typeof module === 'object' && module.exports) module.exports = { makeZip: makeZip };
+</script>
+<script>
+var HELPER = 'http://localhost:4747';
+var projEl = document.getElementById('projname'), detectedEl = document.getElementById('detected'), nameEdited = false;
+var out = document.getElementById('out'), tokenEl = document.getElementById('token'), linkEl = document.getElementById('filelink'), optArt = document.getElementById('optArtboard'), optComp = document.getElementById('optComp'), optInner = document.getElementById('optInner'), optAuto = document.getElementById('optAuto'), optReplace = document.getElementById('optReplace'), optLink = document.getElementById('optLink'), optSafe = document.getElementById('optSafe'), safeTargets = document.getElementById('safeTargets'), mode = 'send', last = null;
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+parent.postMessage({ pluginMessage: { type: 'loadSettings' } }, '*');
+function ask(m) { mode = m; parent.postMessage({ pluginMessage: { type: 'convert', components: optComp.checked } }, '*'); }
+// The project / folder / Rive file is named after the first selected frame, so the names always match.
+function cleanName(s) { return String(s || '').replace(/[^A-Za-z0-9 _-]/g, '').replace(/\s+/g, ' ').trim().slice(0, 60); }
+function projectName(m, fallback) {
+  var typed = cleanName(projEl.value);
+  if (nameEdited && typed) return typed;
+  var first = m.nodes && m.nodes[0] && m.nodes[0].name;
+  return cleanName(first || m.fileName) || fallback;
+}
+// What is selected right now: shown on open and updated whenever the selection changes.
+var FRAMEISH = { FRAME: 1, COMPONENT: 1, COMPONENT_SET: 1, INSTANCE: 1, GROUP: 1 };
+var frameTimer = null;
+function keepFrameName(sel) {
+  clearTimeout(frameTimer);
+  if (!sel || !sel.count || !tokenEl.value.trim()) return;
+  frameTimer = setTimeout(function () {
+    call('/frame', { name: cleanName(sel.names[0]), names: sel.names, types: sel.types, ids: sel.ids, sizes: sel.sizes, page: sel.page, file: sel.file })
+      .then(function () { var s = document.getElementById('keptNote'); if (s) s.textContent = ''; })
+      .catch(function () { var s = document.getElementById('keptNote'); if (s) s.textContent = ''; });
+  }, 500);
+}
+function showSelection(sel) {
+  var key = sel && sel.ids ? sel.ids.join(',') : '';
+  if (key !== selKey) { if (selKey !== null) out.innerHTML = ''; selKey = key; } // a different selection means the last result no longer applies
+  if (sel && sel.file && sel.file !== curFile) { curFile = sel.file; applyDest(dests[curFile] || (links[curFile] ? 'open' : 'account')); }
+  var has = !!(sel && sel.count);
+  document.getElementById('send').disabled = !has; document.getElementById('zip').disabled = !has;
+  if (!sel || !sel.count) { detectedEl.className = 'box'; detectedEl.innerHTML = 'Select a frame to begin.'; if (!nameEdited) projEl.value = ''; return; }
+  var first = sel.names[0], isFrame = FRAMEISH[sel.types[0]];
+  detectedEl.className = 'box ' + (isFrame ? 'ok' : 'warn');
+  detectedEl.innerHTML = '<b>' + esc(first) + '</b>' + (sel.count > 1 ? ' <span class="muted">+' + (sel.count - 1) + '</span>' : '') + '<span class="muted" id="keptNote"></span>' + (isFrame ? '' : '<br><span class="muted">Not a frame. Select a frame, component or group.</span>');
+  if (!nameEdited) projEl.value = cleanName(first);
+  if (isFrame) keepFrameName(sel);
+}
+function toB64(u8) { var s = '', i, CH = 0x8000; for (i = 0; i < u8.length; i += CH) s += String.fromCharCode.apply(null, u8.subarray(i, i + CH)); return btoa(s); }
+function syncSafe() { safeTargets.style.display = optSafe.checked ? 'block' : 'none'; }
+optSafe.addEventListener('change', function () { syncSafe(); saveSettings && saveSettings(); });
+function opts() { return { artboard: optArt.checked, comp: optComp.checked, inner: optInner.checked, autoPush: optAuto.checked, replace: optReplace.checked, link: optLink.checked, safe: optSafe.checked, target: 'webflow' }; }
+var dests = {}, curDest = 'account', artTarget = null, forceReplace = false, viaUpdate = false, snaps = {}, resendPrev = null, selKey = null, links = {}, recents = [], curFile = '';
+function linkChanged() { if (!curFile || curDest !== 'open') return; var v = linkEl.value.trim(); if (v) links[curFile] = v; else delete links[curFile]; saveSettings(); }
+function ago(t) { var d = Math.max(0, Date.now() - t) / 1000; return d < 60 ? 'just now' : d < 3600 ? Math.floor(d / 60) + ' min ago' : d < 86400 ? Math.floor(d / 3600) + ' h ago' : Math.floor(d / 86400) + ' d ago'; }
+function copyText(t) {
+  var ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+  var ok = false; try { ok = document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta); return ok;
+}
+function addRecent(e) {
+  recents = recents.filter(function (x) { return x.name !== e.name; });
+  recents.unshift(e); recents = recents.slice(0, 5); saveSettings(); renderRecents();
+}
+function patchRecent(name, patch) { recents.forEach(function (x) { if (x.name === name) for (var k in patch) x[k] = patch[k]; }); saveSettings(); renderRecents(); }
+var liveErr = {}, liveCache = {}, liveTried = {}, addTo = '', artErr = {}, tried = {}, recentTab = 'projects', delAsk = null, delMsg = {};
+var REFRESH = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3"/></svg>';
+var refreshing = false;
+var TRASH = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4h11M6 4V2.5h4V4M4 4l.6 9h6.8L12 4M6.5 7v3.5M9.5 7v3.5"/></svg>';
+var TRASH_TIP = 'Click: remove from this list. Cmd+Click: also delete from Rive.';
+function trashBtn(attr, val) { return '<button class="trash" ' + attr + '="' + val + '" title="' + TRASH_TIP + '" aria-label="' + TRASH_TIP + '">' + TRASH + '</button>'; }
+function resolveNames() {
+  var ids = []; recents.forEach(function (x) { if (!x.fb) (x.ids || []).forEach(function (id) { if (id && ids.indexOf(id) < 0) ids.push(id); }); });
+  if (ids.length) parent.postMessage({ pluginMessage: { type: 'resolveNames', ids: ids } }, '*');
+}
+var accountFiles = null;
+function slug(n) { return String(n).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+function fileUrl(f) { return 'https://editor.rive.app/file/' + slug(f.name) + '/' + f.id; }
+function syncAccount() {
+  call('/files').then(function (r) { if (r && r.ok && r.files) { accountFiles = r.files; applyAccount(); } }).catch(function () {});
+}
+// Make the list match your Rive account: one entry per file with its real name, files that were deleted disappear, files you never sent from here appear.
+function applyAccount() {
+  var byId = {}; accountFiles.forEach(function (f) { byId[String(f.id)] = f; });
+  var seen = {}, out = [];
+  recents.slice().sort(function (a, b) { return (b.time || 0) - (a.time || 0); }).forEach(function (x) {
+    var fid = projFileId(x);
+    if (!fid) { out.push(x); return; }
+    if (!byId[fid] || seen[fid]) return;
+    seen[fid] = true; x.title = byId[fid].name; x.url = fileUrl(byId[fid]); out.push(x);
+  });
+  accountFiles.forEach(function (f) {
+    var fid = String(f.id); if (seen[fid]) return;
+    out.push({ name: 'file-' + fid, title: f.name, time: 0, ids: [], frames: [], link: fid, mode: 'existing', url: fileUrl(f), pushed: true });
+  });
+  recents = out; saveSettings(); renderRecents();
+}
+function renderRecents() {
+  var el = document.getElementById('recents');
+  if (!recents.length) { el.innerHTML = ''; return; }
+  var head = '<div class="sec rhead"><span>Recent exports</span><button class="iconbtn" id="rrefresh" title="Refresh" aria-label="Refresh">' + REFRESH + '</button></div><div class="rtabs"><button class="rtab' + (recentTab === 'projects' ? ' on' : '') + '" data-rt="projects">Projects</button><button class="rtab' + (recentTab === 'artboards' ? ' on' : '') + '" data-rt="artboards">Artboards</button></div>';
+  var body = '', items = [];
+  if (recentTab === 'projects') {
+    body = recents.map(function (x, i) {
+      var ask = delAsk === 'p' + i ? '<div class="box warn" style="margin:8px 0 0">Whole files can only be deleted in Rive.<p style="margin:8px 0 0">' + (x.url ? '<a href="' + esc(x.url) + '" target="_blank"><button class="sm">Open in Rive</button></a>' : '') + '<button class="sm alt" data-del="' + i + '">Remove from list</button><button class="sm alt" data-cancel="1">Cancel</button></p></div>' : '';
+      return '<div class="recent"><div class="rtop"><b>' + esc(x.title || x.name) + '</b><span class="muted">' + (x.time ? ago(x.time) + (x.pushed ? ' · pushed' : ' · not pushed') : 'in your account') + '</span></div><div class="rbtns">' +
+        (x.url ? '<a href="' + esc(x.url) + '" target="_blank"><button class="sm alt">Open in Rive</button></a><button class="sm alt" data-copy="' + i + '">Copy link</button>' : '') +
+        (x.ids && x.ids.length ? '<button class="sm alt" data-resend="' + i + '" title="Select the same frames again and update the same Rive file. Renamed frames and layers are updated too.">Update</button>' : '') +
+        '</div>' + ask + (delAsk === 'p' + i ? '' : trashBtn('data-ptrash', i)) + '</div>';
+    }).join('');
+  } else {
+    recents.forEach(function (x) {
+      if ((x.frames && x.frames.length) || tried[x.name]) return;
+      tried[x.name] = true;
+      call('/artboards?name=' + encodeURIComponent(x.name)).then(function (r) { if (r.names && r.names.length) { delete artErr[x.name]; x.frames = r.names; x.fb = true; saveSettings(); } else artErr[x.name] = 'no artboards found in its export'; if (recentTab === 'artboards') renderRecents(); }).catch(function (er) { artErr[x.name] = String(er.message || er); if (recentTab === 'artboards') renderRecents(); });
+    });
+    var hiddenCount = 0; recents.forEach(function (x) { hiddenCount += Object.keys(x.hidden || {}).length; });
+    recents.forEach(function (x) {
+      var fid = projFileId(x); if (!fid || liveTried[fid]) return; liveTried[fid] = true;
+      call('/artboards?fileId=' + fid).then(function (r) { if (r.ok) { delete liveErr[fid]; liveCache[fid] = r.artboards; } else { liveErr[fid] = r.error === 'not found' ? 'restart the helper to read Rive' : (r.error || 'could not read the file'); } renderRecents(); }).catch(function (er) { liveErr[fid] = 'helper not reachable'; renderRecents(); });
+    });
+    recents.forEach(function (x, i) {
+      x.__live = false;
+      var fid = projFileId(x), live = fid && liveCache[fid];
+      if (fid && !live) { x.__live = true; return; } // has a Rive file: show only what is really in it (or why we can't read it)
+      if (!live) return;
+      var byName = {}; (x.frames || []).forEach(function (f, k) { byName[String(f).trim()] = x.fb ? undefined : (x.ids || [])[k]; });
+      var seen = {};
+      live.forEach(function (a) { seen[a.name.trim()] = true; var id = byName[a.name.trim()], key = id || a.name; if (!(x.hidden || {})[key]) items.push({ i: i, key: key, frame: a.name, id: id, comp: a.component, project: x.name, projectTitle: x.title, time: x.time, url: x.url, live: true }); });
+      x.__live = true;
+    });
+    recents.forEach(function (x, i) { if (x.__live) return; (x.frames || []).forEach(function (f, k) { var fid = x.fb ? undefined : (x.ids || [])[k], key = fid || f; if (!(x.hidden || {})[key]) items.push({ i: i, key: key, frame: String(f).trim(), id: fid, project: x.name, projectTitle: x.title, time: x.time, url: x.url }); }); });
+    body = items.length ? items.map(function (it, j) {
+      var ask = delAsk === 'a' + j ? '<div class="box bad" style="margin:8px 0 0"><b>Delete “' + esc(it.frame) + '” from Rive?</b><br><span class="muted">A backup is saved.</span><p style="margin:8px 0 0"><button class="sm" data-adelok="' + j + '">Delete from Rive</button><button class="sm alt" data-cancel="1">Cancel</button></p></div>' : '';
+      return '<div class="recent"><div class="rtop"><b>' + esc(it.frame) + '</b><span class="muted">' + (it.missing ? 'not in Rive' : it.comp ? 'component' : it.live ? 'in Rive' : ago(it.time)) + '</span></div><div class="muted">in ' + esc(it.projectTitle || it.project) + '</div>' + (delMsg[it.key + '|' + it.project] ? '<div class="muted" style="margin-top:4px">' + esc(delMsg[it.key + '|' + it.project]) + '</div>' : '') + '<div class="rbtns">' +
+        (it.id ? '<button class="sm alt" data-pick="' + j + '" title="Select this frame in Figma">Select in Figma</button>' : '') +
+        (it.url ? '<a href="' + esc(it.url) + '" target="_blank"><button class="sm alt">Open in Rive</button></a>' : '') +
+        (it.id && /\/\d+\s*$/.test(it.url || '') ? '<button class="sm alt" data-aupdate="' + j + '" title="Update only this artboard in the Rive file. The other artboards are not touched.">Update</button>' : (it.id ? '<button class="sm alt" disabled title="Push this project to Rive first, then you can update single artboards.">Update</button>' : '')) + '</div>' + ask + (delAsk === 'a' + j ? '' : trashBtn('data-atrash', j)) + '</div>';
+    }).join('') : '<p class="muted">No artboards yet.</p>' + Object.keys(liveErr).map(function (k) { return '<p class="muted">Rive file ' + esc(k) + ': ' + esc(liveErr[k]) + '</p>'; }).join('') + Object.keys(artErr).map(function (k) { return '<p class="muted">' + esc(k) + ': ' + esc(artErr[k]) + '</p>'; }).join('') + (hiddenCount ? '<p><button class="sm alt" id="showHidden">Show ' + hiddenCount + ' hidden</button></p>' : '');
+  }
+  el.innerHTML = head + body;
+  refreshAddTo();
+  function on(sel, fn) { Array.prototype.forEach.call(el.querySelectorAll(sel), fn); }
+  function hide(it) { var x = recents[it.i]; x.hidden = x.hidden || {}; x.hidden[it.key] = true; saveSettings(); }
+  on('#rrefresh', function (b) { b.onclick = function () { if (refreshing) return; refreshing = Date.now(); tried = {}; liveTried = {}; syncAccount(); b.classList.add('spin'); parent.postMessage({ pluginMessage: { type: 'loadSettings' } }, '*'); setTimeout(function () { if (refreshing) { refreshing = false; renderRecents(); } }, 2500); }; });
+  on('#showHidden', function (b) { b.onclick = function () { recents.forEach(function (x) { x.hidden = {}; }); saveSettings(); renderRecents(); }; });
+  on('button[data-rt]', function (b) { b.onclick = function () { recentTab = b.getAttribute('data-rt'); delAsk = null; syncAccount(); if (recentTab === 'artboards') { liveTried = {}; tried = {}; resolveNames(); } renderRecents(); }; });
+  on('button[data-cancel]', function (b) { b.onclick = function () { delAsk = null; renderRecents(); }; });
+  on('button[data-ptrash]', function (b) { b.onclick = function (e) { var i = +b.getAttribute('data-ptrash'); if (e.metaKey || e.ctrlKey) { delAsk = 'p' + i; renderRecents(); } else { recents.splice(i, 1); saveSettings(); renderRecents(); } }; });
+  on('button[data-del]', function (b) { b.onclick = function () { recents.splice(+b.getAttribute('data-del'), 1); delAsk = null; saveSettings(); renderRecents(); }; });
+  on('button[data-atrash]', function (b) { b.onclick = function (e) { var j = +b.getAttribute('data-atrash'); if (e.metaKey || e.ctrlKey) { delAsk = 'a' + j; renderRecents(); } else { hide(items[j]); renderRecents(); } }; });
+  on('button[data-adelok]', function (b) {
+    b.onclick = function () {
+      var it = items[+b.getAttribute('data-adelok')]; b.disabled = true; b.textContent = 'Deleting…';
+      call('/delete-artboard', { name: it.project, artboard: it.frame }).then(function (r) {
+        delAsk = null;
+        if (r.ok || r.gone) { hide(it); if (!r.ok) delMsg[it.key + '|' + it.project] = ''; }
+        else delMsg[it.key + '|' + it.project] = r.output;
+        renderRecents();
+        if (!r.ok && !r.gone) out.innerHTML = '<div class="box bad"><b>Could not delete the artboard.</b><pre>' + esc(r.output) + '</pre></div>';
+        else if (r.gone) out.innerHTML = '<div class="box info">' + esc(r.output) + ' I removed it from your list.</div>';
+        else out.innerHTML = '<div class="box ok"><b>Deleted “' + esc(it.frame) + '” from the Rive file.</b></div>';
+      }).catch(function (er) { delAsk = null; renderRecents(); out.innerHTML = '<div class="box bad"><b>Could not reach the helper.</b> ' + esc(er.message) + '</div>'; });
+    };
+  });
+  on('button[data-aupdate]', function (b) {
+    b.onclick = function () {
+      var it = items[+b.getAttribute('data-aupdate')], fid = (String(it.url).match(/\/(\d+)\s*$/) || [])[1];
+      if (!fid) return;
+      viaUpdate = true; artTarget = { name: it.project }; forceReplace = true;
+      resendPrev = linkEl.value; linkEl.value = fid;
+      parent.postMessage({ pluginMessage: { type: 'select', ids: [it.id] } }, '*');
+      setTimeout(function () { ask('send'); }, 450);
+    };
+  });
+  on('button[data-pick]', function (b) { b.onclick = function () { parent.postMessage({ pluginMessage: { type: 'select', ids: [items[+b.getAttribute('data-pick')].id] } }, '*'); }; });
+  on('button[data-copy]', function (b) {
+    b.onclick = function () { var ok = copyText(recents[+b.getAttribute('data-copy')].url); b.textContent = ok ? 'Copied' : 'Select and copy from Open'; setTimeout(function () { b.textContent = 'Copy link'; }, 1500); };
+  });
+  on('button[data-resend]', function (b) {
+    b.onclick = function () {
+      var x = recents[+b.getAttribute('data-resend')];
+      viaUpdate = true; projEl.value = x.name; nameEdited = true; resendPrev = linkEl.value; linkEl.value = (x.mode ? x.mode === 'existing' : /^\d+$/.test(x.link || '')) ? x.link : ''; // old entries: only a plain file id means an open-file send
+      parent.postMessage({ pluginMessage: { type: 'select', ids: x.ids } }, '*');
+      setTimeout(function () { ask('send'); }, 450);
+    };
+  });
+}
+// ---- what changed since the last export of this file ----------------------
+function hash(str) { var h = 5381, i; for (i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+function flatten(nodes) {
+  var map = {}, count = 0;
+  (function walk(list, path) {
+    (list || []).forEach(function (n) {
+      if (count++ > 3000) return;
+      var sig = hash(JSON.stringify([n.fills, n.strokes, n.effects, n.opacity, n.cornerRadius, n.visible, n.layoutMode, n.fontSize, n.fontName, n.itemSpacing, n.paddingLeft, n.paddingTop]));
+      var chars = n.characters == null ? null : String(n.characters);
+      map[n.id] = [n.name, n.type, Math.round(n.width), Math.round(n.height), Math.round(n.x), Math.round(n.y), chars == null ? null : chars.slice(0, 60), chars == null ? null : hash(chars), sig, path];
+      walk(n.children, (path ? path + ' / ' : '') + n.name);
+    });
+  })(nodes, '');
+  return map;
+}
+function diffSnaps(prev, cur) {
+  var d = { added: [], removed: [], renamed: [], text: [], moved: [], style: [] }, id;
+  for (id in cur) {
+    var c = cur[id], p = prev[id];
+    if (!p) { d.added.push(c[0]); continue; }
+    if (p[0] !== c[0]) d.renamed.push(p[0] + ' \u2192 ' + c[0]);
+    if (c[7] !== p[7]) d.text.push(c[0] + ': \u201C' + (p[6] || '') + '\u201D \u2192 \u201C' + (c[6] || '') + '\u201D');
+    if (c[2] !== p[2] || c[3] !== p[3] || c[4] !== p[4] || c[5] !== p[5]) d.moved.push(c[0] + (c[2] !== p[2] || c[3] !== p[3] ? ' (' + p[2] + '\u00D7' + p[3] + ' \u2192 ' + c[2] + '\u00D7' + c[3] + ')' : ' (moved)'));
+    if (c[8] !== p[8]) d.style.push(c[0]);
+  }
+  for (id in prev) if (!cur[id]) d.removed.push(prev[id][0]);
+  return d;
+}
+function cardHtml(title, badge, body, sev) {
+  return '<div class="issue ' + sev + '"><button class="ihead" data-tog="1" aria-expanded="false"><span class="ititle">' + title + '</span>' + (badge !== '' && badge != null ? '<span class="muted">' + badge + '</span>' : '') + '<span class="chev" aria-hidden="true"></span></button><div class="ibody" hidden>' + body + '</div></div>';
+}
+out.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('.ihead[data-tog]'); if (!b) return;
+  var card = b.parentNode, body = card.querySelector('.ibody');
+  body.hidden = !body.hidden; card.classList.toggle('open', !body.hidden); b.setAttribute('aria-expanded', String(!body.hidden));
+});
+function changesHtml(d, when, all) {
+  var rows = [['added', 'New layers'], ['removed', 'Removed layers'], ['renamed', 'Renamed'], ['text', 'Text changed'], ['moved', 'Resized or moved'], ['style', 'Look changed']], total = 0, h = '';
+  rows.forEach(function (r) {
+    var list = d[r[0]]; if (!list.length) return; total += list.length;
+    h += '<div style="margin-top:6px"><b>' + r[1] + '</b> <span class="muted">' + list.length + '</span><ul>' + list.slice(0, all ? list.length : 8).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + (!all && list.length > 8 ? '<li class="muted">+' + (list.length - 8) + ' more</li>' : '') + '</ul></div>';
+  });
+  return cardHtml('Changes' + (when ? ' since ' + ago(when) : ''), total || 'none', total ? h : '<span class="muted">No changes.</span>', 'info');
+}
+var DEST_HINT = { account: 'Creates a file in your account and keeps updating it.', open: 'Adds to a file you already have open in Rive.' };
+function applyDest(mode) {
+  curDest = mode;
+  Array.prototype.forEach.call(document.querySelectorAll('#destTabs .rtab'), function (b) { b.classList.toggle('on', b.getAttribute('data-dest') === mode); });
+  document.getElementById('linkWrap').hidden = mode !== 'open';
+  document.getElementById('destHint').textContent = DEST_HINT[mode];
+  refreshAddTo();
+  linkEl.value = mode === 'open' ? (links[curFile] || '') : '';
+}
+Array.prototype.forEach.call(document.querySelectorAll('#destTabs .rtab'), function (b) {
+  b.onclick = function () { applyDest(b.getAttribute('data-dest')); if (curFile) { dests[curFile] = curDest; saveSettings(); } if (curDest === 'open') linkEl.focus(); };
+});
+function projFileId(x) { return ((String(x.url || '').match(/\/(\d+)\s*$/) || [])[1]) || ''; }
+function refreshAddTo() {
+  var sel = document.getElementById('addTo'), wrap = document.getElementById('addWrap');
+  var opts = recents.filter(function (x) { return projFileId(x); });
+  if (!opts.some(function (x) { return x.name === addTo; })) addTo = '';
+  sel.innerHTML = '<option value="">New project</option>' + opts.map(function (x) { return '<option value="' + esc(x.name) + '"' + (x.name === addTo ? ' selected' : '') + '>Add to: ' + esc(x.title || x.name) + '</option>'; }).join('');
+  wrap.hidden = !(curDest === 'account' && opts.length);
+}
+document.getElementById('addTo').onchange = function () { addTo = this.value; };
+function prepAddTo() {
+  if (curDest !== 'account' || !addTo || artTarget) return;
+  var x = recents.filter(function (r) { return r.name === addTo; })[0], fid = x && projFileId(x);
+  if (!fid) return;
+  artTarget = { name: addTo }; forceReplace = true; resendPrev = linkEl.value; linkEl.value = fid;
+}
+function mergeFrames(name, ids, names) {
+  recents.forEach(function (x) {
+    if (x.name !== name) return;
+    x.frames = x.frames || []; x.ids = x.ids || [];
+    ids.forEach(function (id, i) {
+      if (x.fb) { if (x.frames.indexOf(names[i]) < 0) x.frames.push(names[i]); return; }
+      var k = x.ids.indexOf(id);
+      if (k < 0) { x.ids.push(id); x.frames.push(names[i]); } else x.frames[k] = names[i];
+    });
+  });
+}
+// ---- Clean tab: tidy names and snap pixels on the selected Figma layers ----------------------------
+function cleanOptsUi() { return { deep: document.getElementById('cDeep').checked, spaces: document.getElementById('cnSpaces').checked, symbols: document.getElementById('cnSymbols').checked, generic: document.getElementById('cnGeneric').checked, pos: document.getElementById('cpPos').checked, size: document.getElementById('cpSize').checked, hl: document.getElementById('chLayers').checked, hp: document.getElementById('chPaints').checked }; }
+var cleanTimer = null;
+function scanClean() { clearTimeout(cleanTimer); cleanTimer = setTimeout(function () { parent.postMessage({ pluginMessage: { type: 'cleanScan', o: cleanOptsUi() } }, '*'); }, 150); }
+function cleanApply(which) { parent.postMessage({ pluginMessage: { type: 'cleanApply', which: which, o: cleanOptsUi() } }, '*'); }
+Array.prototype.forEach.call(document.querySelectorAll('#paneClean input'), function (i) { i.onchange = scanClean; });
+document.getElementById('cnApply').onclick = function () { cleanApply('names'); };
+document.getElementById('cpApply').onclick = function () { cleanApply('pixels'); };
+document.getElementById('chApply').onclick = function () { cleanApply('hidden'); };
+function trySend() { var b = document.getElementById('send'); if (!b.disabled) b.click(); }
+document.getElementById('send').onclick = function () { prepAddTo(); ask('send'); };
+var settingsEl = document.getElementById('settings'), gearEl = document.getElementById('gear'), tokenNote = document.getElementById('tokenNote');
+function toggleSettings(open) { settingsEl.hidden = !open; gearEl.classList.toggle('on', open); if (open) tokenEl.focus(); }
+function saveSettings() { parent.postMessage({ pluginMessage: { type: 'saveSettings', token: tokenEl.value.trim(), fileLink: linkEl.value.trim(), opts: opts(), links: links, recents: recents, snaps: snaps, dests: dests } }, '*'); }
+var dotEl = document.getElementById('dot'), stateEl = document.getElementById('helperState');
+function setHelper(cls, text) { dotEl.className = 'dot ' + cls; dotEl.title = 'Helper: ' + text; stateEl.textContent = 'Helper: ' + text; }
+function checkHelper() {
+  if (!tokenEl.value.trim()) { setHelper('off', 'no token yet'); return; }
+  call('/status').then(function (r) { setHelper(r.ok ? 'ok' : 'bad', r.ok ? 'connected (' + String(r.rive || '').split('\n')[0] + ')' : 'running, but Rive CLI problem'); })
+    .catch(function (er) { setHelper(/bad token/.test(er.message) ? 'bad' : 'off', /bad token/.test(er.message) ? 'token not accepted, paste the one from the helper window' : 'not running, open Start Helper.command'); });
+}
+window.addEventListener('focus', checkHelper);
+gearEl.onclick = function () { tokenNote.textContent = ''; toggleSettings(settingsEl.hidden); };
+tokenEl.onkeydown = function (e) {
+  if (e.key !== 'Enter') return;
+  if (!tokenEl.value.trim()) { tokenNote.textContent = 'Paste the token first.'; return; }
+  saveSettings(); tokenNote.textContent = 'Saved.'; checkHelper();
+  setTimeout(function () { toggleSettings(false); }, 600);
+};
+projEl.oninput = function () { nameEdited = !!projEl.value.trim(); };
+projEl.onkeydown = linkEl.onkeydown = function (e) { if (e.key === 'Enter') trySend(); };
+linkEl.onchange = linkChanged;
+document.getElementById('zip').onclick = function () { ask('zip'); };
+function call(path, body) {
+  return fetch(HELPER + path, { method: body ? 'POST' : 'GET', headers: { 'content-type': 'application/json', 'x-token': tokenEl.value.trim() }, body: body ? JSON.stringify(body) : undefined })
+    .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || r.status); return j; }); });
+}
+function notesHtml(res) {
+  return (res.notes && res.notes.length) ? cardHtml('Notes', res.notes.length, '<ul>' + res.notes.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>', 'info') : '';
+}
+function warningsHtml(res) {
+  return res.warnings.length ? cardHtml('Not converted', res.warnings.length, '<ul>' + res.warnings.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>', 'warning') : '';
+}
+function zipHtml(res, name) {
+  var enc = new TextEncoder();
+  var imgFiles = res.images.map(function (im) { return { path: name + '/' + im.file, data: last.bytes[im.hash] }; });
+  var zip = makeZip(imgFiles.concat([
+    { path: name + '/scene.rml', data: enc.encode(res.rml) }, { path: name + '/rive.yaml', data: enc.encode(res.yaml) },
+    { path: name + '/fonts/README.txt', data: enc.encode('Put these font files here:\n' + res.fonts.map(function (f) { return f.file.replace('fonts/', ''); }).join('\n') + '\n') }]));
+  var url = URL.createObjectURL(new Blob([zip], { type: 'application/zip' }));
+  return '<p style="margin-top:12px"><a download="' + name + '.zip" href="' + url + '"><button class="alt">Download ' + name + '.zip</button></a></p>';
+}
+// ---- tabs + design analysis ----------------------------------------
+var paneImport = document.getElementById('paneImport'), paneAnalysis = document.getElementById('paneAnalysis');
+var tabImport = document.getElementById('tabImport'), tabAnalysis = document.getElementById('tabAnalysis');
+var analysisOut = document.getElementById('analysisOut'), selInfo = document.getElementById('selInfo'), analysisTimer = null;
+function showTab(which) {
+  var a = which === 'analysis', cl = which === 'clean';
+  paneAnalysis.hidden = !a; paneImport.hidden = a || cl; document.getElementById('paneClean').hidden = !cl;
+  tabAnalysis.classList.toggle('on', a); tabImport.classList.toggle('on', which === 'import'); document.getElementById('tabClean').classList.toggle('on', cl);
+  if (a) runAnalysis();
+  if (cl) scanClean();
+}
+tabImport.onclick = function () { showTab('import'); };
+document.getElementById('tabClean').onclick = function () { showTab('clean'); };
+tabAnalysis.onclick = function () { showTab('analysis'); };
+document.getElementById('runAnalysis').onclick = function () { runAnalysis(); };
+document.getElementById('sendClaude').onclick = function () {
+  analysisOut.insertAdjacentHTML('afterbegin', '<div class="box" id="sendNote">Reading the design and previews…</div>');
+  parent.postMessage({ pluginMessage: { type: 'sendToClaude' } }, '*');
+};
+function sendToInbox(m) {
+  var name = projectName(m, 'figma-design');
+  var report = FigmaAnalyze.analyze(m, { componentArtboards: optComp.checked, frameMode: optArt.checked ? 'artboard' : 'layout' });
+  var snapshot = { nodes: m.nodes, components: m.components, images: m.images };
+  var previews = (m.previews || []).map(function (p) { return { name: p.name, base64: toB64(p.bytes) }; });
+  var note = document.getElementById('sendNote');
+  function show(cls, html) { if (note) { note.className = 'box ' + cls; note.innerHTML = html; } else analysisOut.insertAdjacentHTML('afterbegin', '<div class="box ' + cls + '">' + html + '</div>'); }
+  call('/inbox', { name: name, report: report, snapshot: snapshot, previews: previews }).then(function (r) {
+    show('ok', '<b>Sent to Claude.</b><br>Saved ' + r.previews + ' preview image(s), the report and the design data in <code>Exports/claude-inbox</code>.<br>Now tell Claude in the chat: <b>“check the inbox”</b>.');
+  }).catch(function (er) {
+    show('bad', '<b>Could not reach the helper.</b> ' + esc(er.message) + '<br>Run <code>node serve.js</code> in the plugin folder, and paste its token on the Import tab.');
+  });
+}
+function runAnalysis() { analysisOut.innerHTML = '<p class="muted">Analysing…</p>'; parent.postMessage({ pluginMessage: { type: 'analyze' } }, '*'); }
+var expanded = {}, expandedText = {};
+function renderAnalysis(snap) {
+  window.lastSnap = snap;
+  var r = FigmaAnalyze.analyze(snap, { componentArtboards: optComp.checked, frameMode: optArt.checked ? 'artboard' : 'layout' });
+  window.lastAnalysis = r;
+  var col = r.counts.error ? '#f87171' : r.counts.warning ? '#fbbf24' : '#4ade80';
+  var h = '<div class="score"><b class="n" style="color:' + col + '">' + r.score + '</b><div><b>' + esc(r.verdict) + '</b><br>' +
+    '<span class="pill error">' + r.counts.error + ' to fix</span><span class="pill warning">' + r.counts.warning + ' differences</span><span class="pill info">' + r.counts.info + ' tips</span><br>' +
+    '<span class="muted">' + r.stats.nodes + ' layers · ' + r.stats.frames + ' frames · ' + r.stats.autoLayoutFrames + ' with auto layout · ' + r.stats.texts + ' text · ' + r.stats.images + ' images</span></div></div>';
+  if (!r.issues.length) h += '<div class="empty"><b>Nothing to fix.</b><br><span class="muted">This design should import cleanly.</span></div>';
+  var label = { error: 'Fix before importing', warning: 'Will look different', info: 'Good to know' };
+  ['error', 'warning', 'info'].forEach(function (sev) {
+    var group = r.issues.filter(function (i) { return i.severity === sev; });
+    if (!group.length) return;
+    h += '<div class="group-title">' + label[sev] + ' · ' + group.length + '</div>';
+    group.forEach(function (i) {
+      var ids = i.nodes.map(function (n) { return n.id; });
+      var SHOW = 3, open = !!expanded[i.id];
+      function chip(n) { return '<button class="chip" title="Select this layer in Figma" data-one="' + esc(n.id) + '">' + esc(n.name || n.id) + '</button>'; }
+      var layers = '';
+      if (i.nodes.length) {
+        layers = '<div class="layers"><div class="row">' + i.nodes.slice(0, SHOW).map(chip).join('') + '</div>';
+        if (i.nodes.length > SHOW) {
+          layers += '<div class="row more"' + (open ? '' : ' hidden') + '>' + i.nodes.slice(SHOW).map(chip).join('') + '</div>' +
+            '<button class="linkbtn" data-toggle="' + esc(i.id) + '">' + (open ? 'See less' : 'See ' + (i.count - SHOW) + ' more') + '</button>';
+        }
+        layers += (ids.length > 1 ? '<button class="sm alt" data-ids="' + esc(ids.join(',')) + '">Select all ' + (i.count > ids.length ? 'first ' + ids.length : ids.length) + '</button>' : '') + '</div>';
+      }
+      var openCard = !!expandedText[i.id];
+      h += '<div class="issue ' + sev + (openCard ? ' open' : '') + '"><button class="ihead" data-card="' + esc(i.id) + '" aria-expanded="' + openCard + '"><span class="ititle">' + esc(i.title) + '</span>' + (i.count > 1 ? '<span class="muted">\u00D7' + i.count + '</span>' : '') + '<span class="chev" aria-hidden="true"></span></button>' +
+        '<div class="ibody"' + (openCard ? '' : ' hidden') + '><div class="why">' + esc(i.why) + '</div>' +
+        '<div class="fix"><b>How to fix:</b> ' + esc(i.fix) + '</div>' +
+        layers + '</div></div>';
+    });
+  });
+  h += '<p style="margin-top:16px"><button id="goImport">' + (r.counts.error ? 'Import anyway' : 'Go to import') + '</button></p>';
+  analysisOut.innerHTML = h;
+  function selectIds(ids, btn) {
+    Array.prototype.forEach.call(analysisOut.querySelectorAll('.chip.on'), function (c) { c.classList.remove('on'); });
+    if (btn && btn.classList) btn.classList.add('on');
+    parent.postMessage({ pluginMessage: { type: 'select', ids: ids } }, '*');
+  }
+  Array.prototype.forEach.call(analysisOut.querySelectorAll('button[data-ids]'), function (b) {
+    b.onclick = function () { selectIds(b.getAttribute('data-ids').split(','), null); };
+  });
+  Array.prototype.forEach.call(analysisOut.querySelectorAll('button[data-one]'), function (b) {
+    b.onclick = function () { selectIds([b.getAttribute('data-one')], b); };
+  });
+  Array.prototype.forEach.call(analysisOut.querySelectorAll('button[data-toggle]'), function (b) {
+    b.onclick = function () {
+      var id = b.getAttribute('data-toggle'), more = b.parentNode.querySelector('.more');
+      expanded[id] = !expanded[id]; more.hidden = !expanded[id];
+      b.textContent = expanded[id] ? 'See less' : 'See ' + (more.querySelectorAll('.chip').length) + ' more';
+    };
+  });
+  Array.prototype.forEach.call(analysisOut.querySelectorAll('button[data-card]'), function (b) {
+    b.onclick = function () {
+      var id = b.getAttribute('data-card'), card = b.parentNode, body = card.querySelector('.ibody');
+      expandedText[id] = !expandedText[id]; body.hidden = !expandedText[id]; card.classList.toggle('open', !!expandedText[id]); b.setAttribute('aria-expanded', !!expandedText[id]);
+    };
+  });
+  document.getElementById('goImport').onclick = function () { showTab('import'); };
+}
+onmessage = function (e) {
+  var m = e.data.pluginMessage; if (!m) return;
+  if (m.type === 'analysisSnapshot') { renderAnalysis(m); return; }
+  if (m.type === 'claudePayload') { sendToInbox(m); return; }
+  if (m.type === 'cleanScanResult') {
+    var any = !m.empty, ex = function (l) { return l && l.length ? '<br>' + l.map(esc).join('<br>') : ''; };
+    document.getElementById('cleanSel').textContent = m.empty ? 'Select layers or frames to clean.' : 'Cleaning the current selection.';
+    document.getElementById('cnInfo').innerHTML = m.empty ? '' : (m.names.count ? '<b>' + m.names.count + '</b> layer name' + (m.names.count === 1 ? '' : 's') + ' to tidy' + ex(m.names.examples) : 'Names are already clean.');
+    document.getElementById('cpInfo').innerHTML = m.empty ? '' : (m.pixels.count ? '<b>' + m.pixels.count + '</b> layer' + (m.pixels.count === 1 ? ' is' : 's are') + ' off the pixel grid' + ex(m.pixels.examples) : 'Everything is on the pixel grid.');
+    var hc = m.empty ? 0 : m.hidden.layers + m.hidden.paints;
+    document.getElementById('chInfo').innerHTML = m.empty ? '' : (hc ? '<b>' + m.hidden.layers + '</b> hidden layer' + (m.hidden.layers === 1 ? '' : 's') + ', <b>' + m.hidden.paints + '</b> hidden fill/stroke/effect' + (m.hidden.paints === 1 ? '' : 's') + ex(m.hidden.examples) : 'Nothing hidden to remove.');
+    document.getElementById('chApply').disabled = m.empty || !hc;
+    document.getElementById('cnApply').disabled = m.empty || !m.names.count; document.getElementById('cpApply').disabled = m.empty || !m.pixels.count;
+    return;
+  }
+  if (m.type === 'cleanDone') {
+    document.getElementById('cleanOut').innerHTML = '<div class="box ok"><b>' + (m.which === 'names' ? 'Renamed ' : m.which === 'hidden' ? 'Removed ' : 'Snapped ') + m.done + (m.which === 'hidden' ? ' hidden item' : ' layer') + (m.done === 1 ? '' : 's') + '.</b><br><span class="muted">Press Cmd+Z in Figma to undo.</span></div>';
+    return;
+  }
+  if (m.type === 'selection') {
+    if (!document.getElementById('paneClean').hidden) scanClean();
+    showSelection(m);
+    selInfo.textContent = m.count ? m.count + ' selected' : 'nothing selected';
+    if (!paneAnalysis.hidden) { clearTimeout(analysisTimer); analysisTimer = setTimeout(runAnalysis, 400); }
+    return;
+  }
+  if (m.type === 'names') {
+    var changed = false;
+    recents.forEach(function (x) { if (x.fb) return; (x.ids || []).forEach(function (id, k) { var nm = m.map[id]; if (nm != null && x.frames && x.frames[k] !== nm) { x.frames[k] = nm; changed = true; } }); });
+    if (changed) { saveSettings(); renderRecents(); }
+    return;
+  }
+  if (m.type === 'settings' && refreshing) { var wait = Math.max(0, 800 - (Date.now() - refreshing)); refreshing = false; recents = m.recents || recents; snaps = m.snaps || snaps; delAsk = null; setTimeout(function () { renderRecents(); resolveNames(); syncAccount(); }, wait); return; }
+  if (m.type === 'settings') { tokenEl.value = m.token; if (!m.token) toggleSettings(true); checkHelper(); links = m.links || {}; recents = m.recents || []; snaps = m.snaps || {}; dests = m.dests || {}; var sf = m.selection && m.selection.file; if (m.fileLink && sf && !links[sf]) links[sf] = m.fileLink; renderRecents(); resolveNames(); syncAccount(); if (m.opts) { optArt.checked = m.opts.artboard !== false; optComp.checked = m.opts.comp !== false; optInner.checked = m.opts.inner !== false; optAuto.checked = m.opts.autoPush === true; optReplace.checked = m.opts.replace !== false; optLink.checked = m.opts.link !== false; optSafe.checked = m.opts.safe === true || m.opts.webflow === true; syncSafe(); } showSelection(m.selection); return; }
+  if (m.type === 'error') { artTarget = null; forceReplace = false; viaUpdate = false; if (resendPrev !== null) { linkEl.value = resendPrev; resendPrev = null; }
+    out.innerHTML = '<div class="box bad">' + esc(m.message) + '</div>'; return; }
+  if (m.type !== 'snapshot') return;
+  var name = projectName(m, 'figma-import');
+  var res = FigmaToRive.convert({ nodes: m.nodes, components: m.components, images: m.images }, { name: name, frameMode: optArt.checked ? 'artboard' : 'layout', componentArtboards: optComp.checked, linkComponents: optLink.checked, innerShadowOverChildren: optInner.checked });
+  if (optSafe.checked && window.WebflowSafe) res.rml = WebflowSafe.apply(res.rml);   // target is Webflow; Framer is locked for now
+  last = { name: name, bytes: m.imageBytes || {} };
+  if (mode === 'zip') { out.innerHTML = '<div class="box ok">Converted ' + m.nodes.length + ' frame(s).</div>' + notesHtml(res) + warningsHtml(res) + zipHtml(res, name); return; }
+  if (m.fileName) curFile = curFile || m.fileName;
+  var fileId = ((linkEl.value.match(/file\/[^\/]+\/(\d+)/) || linkEl.value.match(/^\s*(\d+)\s*$/) || [])[1]) || '';
+  var linkUsed = linkEl.value; // what this send really uses (Update may differ from the field)
+  if (resendPrev !== null) { linkEl.value = resendPrev; resendPrev = null; } else linkChanged(); // Update must not change the remembered link
+  if (linkUsed.trim() && !fileId) { out.innerHTML = '<div class="box bad">I could not find a file id in that link. It should look like https://editor.rive.app/file/name/1234567</div>'; return; }
+  var curSnap = flatten(m.nodes), wasUpdate = viaUpdate, target = artTarget, forced = forceReplace; viaUpdate = false; artTarget = null; forceReplace = false;
+  var selIds = (m.nodes || []).map(function (n) { return n.id; }), frameNames = (m.nodes || []).map(function (n) { return n.name; });
+  var replacePairs = [];
+  if (fileId && (optReplace.checked || forced)) {
+    var pmapOf = function (key) { return (snaps[key] || {}).map || {}; };
+    var pmap = {}; [snaps['file-' + fileId] && 'file-' + fileId, target && target.name].forEach(function (k) { if (k) { var mp = pmapOf(k); for (var id in mp) if (!pmap[id]) pmap[id] = mp[id]; } });
+    (m.nodes || []).forEach(function (n) { var nw = String(n.name).trim(); replacePairs.push({ old: pmap[n.id] ? String(pmap[n.id][0]).trim() : nw, new: nw }); });
+    (res.componentNames || []).forEach(function (nm) { replacePairs.push({ old: nm, new: nm }); });
+  }
+  function runExport() {
+  out.innerHTML = '<div class="box">Sending to the helper…</div>';
+  return call('/export', { name: name, rml: res.rml, yaml: res.yaml, fonts: res.fonts, fileId: fileId, replace: replacePairs, images: res.images.map(function (im) { return { file: im.file, base64: toB64(last.bytes[im.hash]) }; }) }).then(function (r) {
+    var ok = r.verify.ok, f = r.fonts, html = '<div class="box ' + (ok ? 'ok' : 'bad') + '"><b>' + (ok ? 'Built and verified' : 'rive found errors') + '</b>' +
+      (r.mode === 'existing' ? '<br>' + (r.replaced && r.replaced.length ? 'Replaced: <b>' + r.replaced.map(esc).join(', ') + '</b><br>' : '') + 'Now in the file: <b>' + (r.added || []).map(esc).join(', ') + '</b>' : '') + (ok ? '' : '<pre>' + esc(r.verify.output) + '</pre>') + '</div>';
+    if (f.standIn.length) html += '<div class="box warn"><b>Stand-in fonts used</b><ul>' + f.standIn.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>Add them to <code>Fonts Library/</code> and send again.</div>';
+    if (f.missing.length) html += '<div class="box bad"><b>Missing fonts</b>: ' + f.missing.map(esc).join(', ') + '</div>';
+    html += notesHtml(res) + warningsHtml(res);
+    var prevSnap = snaps[r.name], changes = ok && prevSnap ? changesHtml(diffSnaps(prevSnap.map, curSnap), prevSnap.time) : (ok && wasUpdate ? '<div class="box info">No earlier record to compare. Changes show from the next update.</div>' : '');
+    if (ok) { snaps[r.name] = { time: Date.now(), map: curSnap }; var keep = Object.keys(snaps).sort(function (a, b) { return snaps[b].time - snaps[a].time; }); keep.slice(5).forEach(function (k) { delete snaps[k]; }); }
+    var banner = ok ? '<div class="box warn" id="notPushed"><b>Not pushed yet</b><p style="margin:8px 0 0"><button id="push">' + (r.mode === 'existing' ? 'Add to my Rive file' : 'Push to Rive') + '</button></p></div>' : '';
+    out.innerHTML = banner + changes + html + zipHtml(res, name);
+    var fileUrl = r.mode === 'existing' ? 'https://editor.rive.app/file/' + r.fileId : '';
+    var prev = recents.filter(function (x) { return x.name === r.name; })[0];
+    if (target) { mergeFrames(target.name, selIds, frameNames); patchRecent(target.name, { time: Date.now() }); } else addRecent({ name: r.name, mode: r.mode === 'existing' ? 'existing' : 'new', time: Date.now(), ids: selIds, frames: frameNames, link: r.mode === 'existing' ? String(r.fileId) : '', url: fileUrl || (prev && prev.url) || '', pushed: !!(prev && prev.pushed && r.mode !== 'existing') });
+    var pb = document.getElementById('push');
+    if (pb) pb.onclick = function () {
+      pb.disabled = true; pb.textContent = 'Pushing…';
+      call('/push', { name: r.name, label: 'Figma import' }).then(function (p) {
+        var h = '<div class="box ' + (p.ok ? 'ok' : 'bad') + '"><b>' + (p.ok ? 'Pushed to Rive' : 'Push failed') + '</b>' +
+          (p.url ? '<br><a href="' + p.url + '" target="_blank">' + p.url + '</a>' : '') + (p.ok ? '' : '<pre>' + esc(p.output) + '</pre>') + '</div>';
+        var np = document.getElementById('notPushed'); if (np && p.ok) np.parentNode.removeChild(np);
+        out.insertAdjacentHTML('afterbegin', h); pb.textContent = 'Pushed';
+        if (p.ok) patchRecent(target ? target.name : r.name, target ? { pushed: true, time: Date.now() } : { pushed: true, time: Date.now(), url: p.url || fileUrl, link: r.mode === 'existing' ? String(r.fileId || '') : '' });
+      }).catch(function (er) { out.insertAdjacentHTML('afterbegin', '<div class="box bad">' + esc(er.message) + '</div>'); pb.disabled = false; pb.textContent = 'Try again'; });
+    };
+    if (pb && optAuto.checked && !prevSnap && !wasUpdate) pb.click(); // an update always waits, so you can read the change report first
+  }).catch(function (er) {
+    out.innerHTML = '<div class="box bad"><b>Helper not reachable.</b> Start it with <code>Start Helper.command</code>. Zip still works.</div>' + warningsHtml(res) + zipHtml(res, name);
+  });
+  }
+  // Before sending: warn about fonts that are not in the library, and about updating a file that was already pushed.
+  var wanted = (res.fonts || []).map(function (f) { return String(f.file).replace(/^fonts\//, ''); });
+  var again = !fileId && recents.filter(function (x) { return x.name === name && x.pushed; })[0];
+  call('/status').then(function (st) { return st.realFonts || []; }, function () { return null; }).then(function (real) {
+    var miss = real ? wanted.filter(function (f) { return real.indexOf(f) < 0; }) : [], msgs = [];
+    if (miss.length) msgs.push(cardHtml('Fonts missing', miss.length, '<ul>' + miss.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul><span class="muted">A stand-in font is used.</span>', 'warning'));
+    var renamedAb = replacePairs.filter(function (x) { return x.old !== x.new; });
+    if (renamedAb.length) msgs.push(cardHtml('Artboard renamed in Rive', renamedAb.length, '<ul>' + renamedAb.map(function (x) { return '<li>' + esc(x.old) + ' \u2192 <b>' + esc(x.new) + '</b></li>'; }).join('') + '</ul><span class="muted">Replaces the old artboard. Edits you made to it in Rive are lost (backup saved).</span>', 'warning'));
+    if (again) msgs.push(cardHtml('Already pushed', '', 'This updates the same Rive file.', 'info'));
+    var gateKey = fileId ? 'file-' + fileId : name, before = snaps[gateKey];
+    if (before) msgs.unshift(changesHtml(diffSnaps(before.map, curSnap), before.time, true));
+    if (!msgs.length) { runExport(); return; }
+    out.innerHTML = msgs.join('') + '<div class="actions"><button id="goOn">Send anyway</button><button id="goStop" class="alt">Cancel</button></div>';
+    document.getElementById('goOn').onclick = runExport;
+    document.getElementById('goStop').onclick = function () { out.innerHTML = ''; };
+  });
+};
+</script>
+

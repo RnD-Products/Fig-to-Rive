@@ -1,0 +1,702 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  :root { color-scheme: dark; --bg:#1e1e1e; --panel:#2a2a2a; --panel2:#262626; --line:#3d3d3d; --text:#e8e8e8; --muted:#9b9b9b; --accent:#0d99ff;
+    --code:#383838; --err:#f87171; --warn:#fbbf24; --ok:#4ade80; --info:#60a5fa; --fixbg:#12372a; --fixfg:#86efac; --chip:#27304d; --chipline:#3b4a7a; --chiptext:#c7d2fe; }
+  html, body { background: var(--bg); }
+  body { font: 12px/1.5 Inter, system-ui, sans-serif; margin: 0; padding: 0 16px 20px; color: var(--text); }
+  h1 { font-size: 14px; margin: 0 0 4px; }
+  p { margin: 0 0 12px; color: var(--muted); }
+  p b, p code { color: var(--text); }
+  a { color: var(--accent); }
+  button { font: inherit; font-weight: 500; padding: 8px 14px; border-radius: 6px; border: 0; background: var(--accent); color: #fff; cursor: pointer; margin-right: 6px; transition: filter .12s, background .12s; }
+  button:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button:hover { filter: brightness(1.1); }
+  button.alt { background: #3a3a3a; color: var(--text); }
+  button[disabled] { opacity: .4; cursor: not-allowed; filter: none; }
+  input { font: inherit; width: 100%; box-sizing: border-box; padding: 7px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel2); color: var(--text); outline: none; }
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: #6f6f6f; }
+  .box { margin-top: 12px; padding: 10px; border-radius: 6px; background: var(--panel); color: var(--text); }
+  /* colour only as a thin marker, never as text */
+  .box.ok { border-left: 3px solid var(--ok); } .box.warn { border-left: 3px solid var(--warn); } .box.bad { border-left: 3px solid var(--err); } .box.info { border-left: 3px solid var(--info); }
+  .box.warn li, .box.info li { color: #cfcfcf; }
+  code { background: var(--code); color: var(--text); padding: 1px 4px; border-radius: 3px; }
+  ul { margin: 4px 0 0 16px; padding: 0; } pre { white-space: pre-wrap; margin: 6px 0 0; font-size: 11px; max-height: 120px; overflow: auto; color: var(--text); }
+  label { display: block; margin: 8px 0 4px; color: var(--muted); }
+  label.chk { display: flex; gap: 8px; align-items: flex-start; color: var(--text); margin: 6px 0; }
+  label.chk input { width: auto; margin-top: 2px; accent-color: var(--accent); }
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 0 -16px 14px; padding: 6px 16px 0; position: sticky; top: 0; background: var(--bg); z-index: 5; }
+  .tab { background: none; color: var(--muted); border-radius: 6px 6px 0 0; padding: 8px 12px; margin: 0; }
+  .tab:hover { color: var(--text); filter: none; }
+  .tab.on { color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); font-weight: 600; }
+  .score { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; background: var(--panel); }
+  .score b.n { font-size: 26px; line-height: 1; color: var(--text); }
+  .pill { display: inline-block; padding: 1px 8px 1px 6px; border-radius: 10px; font-size: 11px; margin-right: 4px; color: #cfcfcf; background: #363636; }
+  .pill::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+  .pill.error::before { background: #ef4444; } .pill.warning::before { background: #f59e0b; } .pill.info::before { background: #3b82f6; }
+  .issue { border: 1px solid var(--line); background: var(--panel2); border-radius: 8px; padding: 10px; margin-top: 8px; }
+  .issue.error { border-left: 4px solid #ef4444; } .issue.warning { border-left: 4px solid #f59e0b; } .issue.info { border-left: 4px solid #3b82f6; }
+  .issue h3 { font-size: 12px; margin: 0 0 4px; color: var(--text); }
+  .issue .fix { margin-top: 6px; padding: 6px 8px; background: #323232; border-radius: 6px; color: var(--text); }
+  .issue .why { color: #b5b5b5; }
+  button.sm { padding: 3px 8px; font-size: 11px; margin: 6px 6px 0 0; }
+  .muted { color: var(--muted); }
+  .layers { margin-top: 8px; }
+  .layers .row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .chip { background: #333; color: #ddd; border: 1px solid #4a4a4a; border-radius: 12px; padding: 2px 9px; font-size: 11px; margin: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chip:hover { background: #3f3f3f; } .chip.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .linkbtn { background: none; color: var(--accent); padding: 2px 4px; margin: 4px 0 0; font-size: 11px; }
+  .more[hidden] { display: none; }
+  .tabs .gear { margin: 0 0 0 auto; padding: 6px 8px; background: none; color: var(--muted); font-size: 16px; line-height: 1; border-radius: 6px; }
+  .tabs .gear:hover, .tabs .gear.on { color: var(--accent); filter: none; }
+  #settings { margin: 0 0 12px; padding: 10px; border-radius: 8px; background: var(--panel); }
+  #settings[hidden] { display: none; }
+  #settings label { margin-top: 0; }
+  #tokenNote { margin-top: 6px; min-height: 14px; }
+  .sec { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 16px 0 6px; }
+  .field { margin-bottom: 2px; } .field label { margin: 0 0 4px; } .hint { margin: 4px 0 0; font-size: 11px; color: var(--muted); }
+  details.opts { margin-top: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel2); }
+  details.opts summary { cursor: pointer; padding: 9px 10px; color: var(--text); font-weight: 500; list-style: none; display: flex; align-items: center; gap: 6px; }
+  details.opts summary::-webkit-details-marker { display: none; }
+  details.opts summary::before { content: '\25B8'; color: var(--muted); transition: transform .12s; }
+  details.opts[open] summary::before { transform: rotate(90deg); }
+  details.opts .body { padding: 0 10px 6px; border-top: 1px solid var(--line); }
+  .actions { display: flex; gap: 8px; margin-top: 16px; } .actions button { margin: 0; flex: 1; padding: 10px 14px; } .actions button.alt { flex: 0 0 auto; }
+  input:disabled { opacity: .5; }
+  select { font: inherit; width: 100%; box-sizing: border-box; padding: 7px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel2); color: var(--text); outline: none; }
+  select:focus { border-color: var(--accent); }
+  .recent { border: 1px solid var(--line); background: var(--panel2); border-radius: 8px; padding: 8px 10px; margin-top: 6px; }
+  .recent .rtop { display: flex; justify-content: space-between; gap: 8px; } .recent .rtop b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rhead { display: flex; align-items: center; justify-content: space-between; }
+  .iconbtn { margin: 0; padding: 3px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; background: none; color: var(--muted); border-radius: 6px; }
+  .iconbtn:hover { color: var(--text); background: #333; filter: none; }
+  .iconbtn.spin svg { animation: spin .8s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }
+  .recent { position: relative; }
+  .recent .trash { position: absolute; right: 6px; bottom: 6px; margin: 0; padding: 4px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: none; color: var(--muted); border-radius: 6px; opacity: 0; transition: opacity .12s, color .12s, background .12s; }
+  .recent:hover .trash, .recent .trash:focus-visible { opacity: 1; } .recent .trash:hover { color: var(--err); background: #3a3a3a; filter: none; }
+  .rtabs { display: flex; gap: 4px; padding: 2px; border-radius: 8px; background: var(--panel); width: fit-content; }
+  .rtab { margin: 0; padding: 4px 12px; border-radius: 6px; background: none; color: var(--muted); font-size: 11px; } .rtab:hover { color: var(--text); filter: none; } .rtab.on { background: #3a3a3a; color: var(--text); }
+  .recent .rbtns { padding-right: 28px; }
+  .recent .rbtns { display: flex; gap: 6px; flex-wrap: wrap; } .recent .rbtns button { margin: 6px 0 0; } .recent a { text-decoration: none; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #6b6b6b; align-self: center; margin-left: auto; margin-right: 2px; flex: none; }
+  .dot + .gear { margin-left: 0; }
+  .dot.ok { background: var(--ok); } .dot.bad { background: var(--err); } .dot.off { background: #6b6b6b; }
+  .score b.n { min-width: 44px; text-align: center; }
+  .score .sub { margin-top: 4px; }
+  .issue { padding: 0; }
+  .ihead { display: flex; align-items: center; gap: 8px; width: 100%; margin: 0; padding: 10px; background: none; color: var(--text); text-align: left; border-radius: 8px; font-weight: 600; }
+  .ihead:hover { background: #2f2f2f; filter: none; }
+  .ihead .ititle { flex: 1; min-width: 0; }
+  .ihead .chev { width: 7px; height: 7px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(-45deg); transition: transform .12s; flex: none; margin-right: 2px; }
+  .cardbody { padding: 10px; }
+  .issue.open .chev { transform: rotate(45deg); }
+  .ibody { padding: 0 10px 10px; } .ibody[hidden] { display: none; }
+  .issue .why { margin-top: 2px; }
+  .head-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; } .head-actions button { margin: 0; }
+  .group-title { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 18px 0 0; }
+  .empty { padding: 14px; border-radius: 8px; background: var(--panel); text-align: center; color: var(--text); margin-top: 12px; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; } ::-webkit-scrollbar-thumb { background: #444; border-radius: 5px; border: 2px solid var(--bg); } ::-webkit-scrollbar-track { background: var(--bg); }
+</style>
+<div class="tabs">
+  <button class="tab on" id="tabImport">Import</button>
+  <button class="tab" id="tabAnalysis">Design analysis</button>
+  <button class="tab" id="tabClean">Clean</button>
+  <span class="dot off" id="dot" title="Helper: checking"></span>
+  <button class="gear" id="gear" title="Settings" aria-label="Settings">&#9881;</button>
+</div>
+<div id="settings" hidden>
+  <label for="token">Helper token</label>
+  <input id="token" placeholder="Paste, then press Enter" autocomplete="off" spellcheck="false">
+  <div class="muted" id="tokenNote"></div>
+  <div class="muted" id="helperState" style="margin-top:6px"></div>
+</div>
+<div id="paneClean" hidden>
+  <div class="muted" id="cleanSel" style="margin-bottom:8px">Select layers or frames to clean.</div>
+  <div class="issue info"><div class="cardbody">
+    <div class="sec" style="margin-top:0">Names</div>
+    <label class="chk"><input type="checkbox" id="cnSpaces" checked><span>Trim and collapse extra spaces</span></label>
+    <label class="chk"><input type="checkbox" id="cnSymbols" checked><span>Remove emoji and hidden characters</span></label>
+    <label class="chk" title='Turns names like "Frame 2147230678" or "Vector 9323" into "Frame" or "Vector".'><input type="checkbox" id="cnGeneric" checked><span>Simplify default names (Frame 123 &rarr; Frame)</span></label>
+    <div class="muted" id="cnInfo" style="margin:6px 0 8px"></div>
+    <button id="cnApply">Clean names</button>
+  </div></div>
+  <div class="issue info" style="margin-top:12px"><div class="cardbody">
+    <div class="sec" style="margin-top:0">Pixels</div>
+    <label class="chk" title="Rounds x and y to whole numbers. Skips rotated and flipped layers and layers placed by auto layout."><input type="checkbox" id="cpPos" checked><span>Snap positions to whole pixels</span></label>
+    <label class="chk" title="Rounds width and height. Skips text, lines, and sizes set to hug or fill."><input type="checkbox" id="cpSize" checked><span>Snap sizes to whole pixels</span></label>
+    <div class="muted" id="cpInfo" style="margin:6px 0 8px"></div>
+    <button id="cpApply">Snap to pixels</button>
+  </div></div>
+  <div class="issue info" style="margin-top:12px"><div class="cardbody">
+    <div class="sec" style="margin-top:0">Hidden</div>
+    <label class="chk" title="Deletes layers whose eye is switched off. They are not imported into Rive anyway. Layers inside instances are skipped."><input type="checkbox" id="chLayers" checked><span>Delete hidden layers</span></label>
+    <label class="chk" title="Removes fills, strokes, shadows and blurs that are switched off or at 0% opacity."><input type="checkbox" id="chPaints" checked><span>Remove hidden fills, strokes and effects</span></label>
+    <div class="muted" id="chInfo" style="margin:6px 0 8px"></div>
+    <button id="chApply">Remove hidden</button>
+  </div></div>
+  <label class="chk" style="margin-top:12px"><input type="checkbox" id="cDeep" checked><span>Include everything inside the selection</span></label>
+  <div id="cleanOut"></div>
+</div>
+<div id="paneAnalysis" hidden>
+  <div class="head-actions"><button id="runAnalysis">Analyse selection</button><button id="sendClaude" class="alt" title="Saves the report, previews and design data in the helper's claude-inbox folder">Send to Claude</button>
+  <span class="muted" id="selInfo"></span></div>
+  <div id="analysisOut"></div>
+</div>
+<div id="paneImport">
+<div class="box" id="detected" style="margin-top:0">Select a frame to begin.</div>
+
+<div class="sec">File name</div>
+<input id="projname" placeholder="From the selected frame">
+
+<div class="sec">Destination</div>
+<div class="rtabs" id="destTabs"><button class="rtab on" data-dest="account">My account</button><button class="rtab" data-dest="open">Open Rive file</button></div>
+<div class="field" id="linkWrap" hidden style="margin-top:8px">
+  <input id="filelink" placeholder="Paste the file's link or id" aria-label="Open Rive file link">
+</div>
+<div class="field" id="addWrap" hidden style="margin-top:8px"><select id="addTo" aria-label="Add to project"></select></div>
+<div class="hint" id="destHint"></div>
+
+<details class="opts">
+  <summary>Options</summary>
+  <div class="body">
+    <label class="chk" title="Size, fill and layout of the frame become the artboard's. Off: the frame is a layout box inside a plain artboard."><input type="checkbox" id="optArtboard" checked><span>Frame becomes the artboard</span></label>
+    <label class="chk" title="Each main component becomes its own Rive component artboard."><input type="checkbox" id="optComp" checked><span>Components as artboards</span></label>
+    <label class="chk" title="Instances become live nested artboards of their component. Needs Components on. Off: plain layout."><input type="checkbox" id="optLink" checked><span>Link instances to components</span></label>
+    <label class="chk" title="Inner shadows also cover the layers inside, like Figma."><input type="checkbox" id="optInner" checked><span>Inner shadows over contents</span></label>
+    <label class="chk" title="Rewrites the layout so the file draws the same in the runtime you pick below, not only in the Rive editor. Off: the normal Rive output."><input type="checkbox" id="optSafe"><span>Safe layout</span></label>
+    <div id="safeTargets" style="display:none;margin:2px 0 6px 22px;font-size:11px;color:var(--muted,#888)">
+      <label style="margin-right:12px" title="Rive element in Webflow (runtime 2.35): no layout boxes in Nodes, rotations and flips baked into shapes, fixed text boxes, no hue or additive blends."><input type="radio" name="safeTarget" id="tgtWebflow" value="webflow" checked> Webflow</label>
+      <label style="opacity:.5;cursor:not-allowed" title="Locked: Framer is not supported yet."><input type="radio" name="safeTarget" id="tgtFramer" value="framer" disabled> Framer &#128274;</label>
+    </div>
+    <label class="chk" title="Open Rive file only. The old artboard is swapped for the new one, even after a rename. Edits you made to it in Rive are lost (a backup is saved). Off: saves a new artboard."><input type="checkbox" id="optReplace" checked><span>Update replaces the artboard</span></label>
+    <label class="chk" title="Pushes as soon as the export verifies. Updates still wait for you."><input type="checkbox" id="optAuto"><span>Push automatically</span></label>
+  </div>
+</details>
+
+<div class="actions">
+  <button id="send">Send to Rive</button><button id="zip" class="alt" title="Download the converted files without the helper">Zip</button>
+</div>
+
+<div id="out"></div>
+<div id="recents"></div>
+</div>
+<script>/*__CONVERT__*/</script>
+<script>/*__ANALYZE__*/</script>
+<script>/*__WEBFLOW__*/</script>
+<script>/*__ZIP__*/</script>
+<script>
+var HELPER = 'http://localhost:4747';
+var projEl = document.getElementById('projname'), detectedEl = document.getElementById('detected'), nameEdited = false;
+var out = document.getElementById('out'), tokenEl = document.getElementById('token'), linkEl = document.getElementById('filelink'), optArt = document.getElementById('optArtboard'), optComp = document.getElementById('optComp'), optInner = document.getElementById('optInner'), optAuto = document.getElementById('optAuto'), optReplace = document.getElementById('optReplace'), optLink = document.getElementById('optLink'), optSafe = document.getElementById('optSafe'), safeTargets = document.getElementById('safeTargets'), mode = 'send', last = null;
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+parent.postMessage({ pluginMessage: { type: 'loadSettings' } }, '*');
+function ask(m) { mode = m; parent.postMessage({ pluginMessage: { type: 'convert', components: optComp.checked } }, '*'); }
+// The project / folder / Rive file is named after the first selected frame, so the names always match.
+function cleanName(s) { return String(s || '').replace(/[^A-Za-z0-9 _-]/g, '').replace(/\s+/g, ' ').trim().slice(0, 60); }
+function projectName(m, fallback) {
+  var typed = cleanName(projEl.value);
+  if (nameEdited && typed) return typed;
+  var first = m.nodes && m.nodes[0] && m.nodes[0].name;
+  return cleanName(first || m.fileName) || fallback;
+}
+// What is selected right now: shown on open and updated whenever the selection changes.
+var FRAMEISH = { FRAME: 1, COMPONENT: 1, COMPONENT_SET: 1, INSTANCE: 1, GROUP: 1 };
+var frameTimer = null;
+function keepFrameName(sel) {
+  clearTimeout(frameTimer);
+  if (!sel || !sel.count || !tokenEl.value.trim()) return;
+  frameTimer = setTimeout(function () {
+    call('/frame', { name: cleanName(sel.names[0]), names: sel.names, types: sel.types, ids: sel.ids, sizes: sel.sizes, page: sel.page, file: sel.file })
+      .then(function () { var s = document.getElementById('keptNote'); if (s) s.textContent = ''; })
+      .catch(function () { var s = document.getElementById('keptNote'); if (s) s.textContent = ''; });
+  }, 500);
+}
+function showSelection(sel) {
+  var key = sel && sel.ids ? sel.ids.join(',') : '';
+  if (key !== selKey) { if (selKey !== null) out.innerHTML = ''; selKey = key; } // a different selection means the last result no longer applies
+  if (sel && sel.file && sel.file !== curFile) { curFile = sel.file; applyDest(dests[curFile] || (links[curFile] ? 'open' : 'account')); }
+  var has = !!(sel && sel.count);
+  document.getElementById('send').disabled = !has; document.getElementById('zip').disabled = !has;
+  if (!sel || !sel.count) { detectedEl.className = 'box'; detectedEl.innerHTML = 'Select a frame to begin.'; if (!nameEdited) projEl.value = ''; return; }
+  var first = sel.names[0], isFrame = FRAMEISH[sel.types[0]];
+  detectedEl.className = 'box ' + (isFrame ? 'ok' : 'warn');
+  detectedEl.innerHTML = '<b>' + esc(first) + '</b>' + (sel.count > 1 ? ' <span class="muted">+' + (sel.count - 1) + '</span>' : '') + '<span class="muted" id="keptNote"></span>' + (isFrame ? '' : '<br><span class="muted">Not a frame. Select a frame, component or group.</span>');
+  if (!nameEdited) projEl.value = cleanName(first);
+  if (isFrame) keepFrameName(sel);
+}
+function toB64(u8) { var s = '', i, CH = 0x8000; for (i = 0; i < u8.length; i += CH) s += String.fromCharCode.apply(null, u8.subarray(i, i + CH)); return btoa(s); }
+function syncSafe() { safeTargets.style.display = optSafe.checked ? 'block' : 'none'; }
+optSafe.addEventListener('change', function () { syncSafe(); saveSettings && saveSettings(); });
+function opts() { return { artboard: optArt.checked, comp: optComp.checked, inner: optInner.checked, autoPush: optAuto.checked, replace: optReplace.checked, link: optLink.checked, safe: optSafe.checked, target: 'webflow' }; }
+var dests = {}, curDest = 'account', artTarget = null, forceReplace = false, viaUpdate = false, snaps = {}, resendPrev = null, selKey = null, links = {}, recents = [], curFile = '';
+function linkChanged() { if (!curFile || curDest !== 'open') return; var v = linkEl.value.trim(); if (v) links[curFile] = v; else delete links[curFile]; saveSettings(); }
+function ago(t) { var d = Math.max(0, Date.now() - t) / 1000; return d < 60 ? 'just now' : d < 3600 ? Math.floor(d / 60) + ' min ago' : d < 86400 ? Math.floor(d / 3600) + ' h ago' : Math.floor(d / 86400) + ' d ago'; }
+function copyText(t) {
+  var ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+  var ok = false; try { ok = document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta); return ok;
+}
+function addRecent(e) {
+  recents = recents.filter(function (x) { return x.name !== e.name; });
+  recents.unshift(e); recents = recents.slice(0, 5); saveSettings(); renderRecents();
+}
+function patchRecent(name, patch) { recents.forEach(function (x) { if (x.name === name) for (var k in patch) x[k] = patch[k]; }); saveSettings(); renderRecents(); }
+var liveErr = {}, liveCache = {}, liveTried = {}, addTo = '', artErr = {}, tried = {}, recentTab = 'projects', delAsk = null, delMsg = {};
+var REFRESH = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3"/></svg>';
+var refreshing = false;
+var TRASH = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4h11M6 4V2.5h4V4M4 4l.6 9h6.8L12 4M6.5 7v3.5M9.5 7v3.5"/></svg>';
+var TRASH_TIP = 'Click: remove from this list. Cmd+Click: also delete from Rive.';
+function trashBtn(attr, val) { return '<button class="trash" ' + attr + '="' + val + '" title="' + TRASH_TIP + '" aria-label="' + TRASH_TIP + '">' + TRASH + '</button>'; }
+function resolveNames() {
+  var ids = []; recents.forEach(function (x) { if (!x.fb) (x.ids || []).forEach(function (id) { if (id && ids.indexOf(id) < 0) ids.push(id); }); });
+  if (ids.length) parent.postMessage({ pluginMessage: { type: 'resolveNames', ids: ids } }, '*');
+}
+var accountFiles = null;
+function slug(n) { return String(n).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+function fileUrl(f) { return 'https://editor.rive.app/file/' + slug(f.name) + '/' + f.id; }
+function syncAccount() {
+  call('/files').then(function (r) { if (r && r.ok && r.files) { accountFiles = r.files; applyAccount(); } }).catch(function () {});
+}
+// Make the list match your Rive account: one entry per file with its real name, files that were deleted disappear, files you never sent from here appear.
+function applyAccount() {
+  var byId = {}; accountFiles.forEach(function (f) { byId[String(f.id)] = f; });
+  var seen = {}, out = [];
+  recents.slice().sort(function (a, b) { return (b.time || 0) - (a.time || 0); }).forEach(function (x) {
+    var fid = projFileId(x);
+    if (!fid) { out.push(x); return; }
+    if (!byId[fid] || seen[fid]) return;
+    seen[fid] = true; x.title = byId[fid].name; x.url = fileUrl(byId[fid]); out.push(x);
+  });
+  accountFiles.forEach(function (f) {
+    var fid = String(f.id); if (seen[fid]) return;
+    out.push({ name: 'file-' + fid, title: f.name, time: 0, ids: [], frames: [], link: fid, mode: 'existing', url: fileUrl(f), pushed: true });
+  });
+  recents = out; saveSettings(); renderRecents();
+}
+function renderRecents() {
+  var el = document.getElementById('recents');
+  if (!recents.length) { el.innerHTML = ''; return; }
+  var head = '<div class="sec rhead"><span>Recent exports</span><button class="iconbtn" id="rrefresh" title="Refresh" aria-label="Refresh">' + REFRESH + '</button></div><div class="rtabs"><button class="rtab' + (recentTab === 'projects' ? ' on' : '') + '" data-rt="projects">Projects</button><button class="rtab' + (recentTab === 'artboards' ? ' on' : '') + '" data-rt="artboards">Artboards</button></div>';
+  var body = '', items = [];
+  if (recentTab === 'projects') {
+    body = recents.map(function (x, i) {
+      var ask = delAsk === 'p' + i ? '<div class="box warn" style="margin:8px 0 0">Whole files can only be deleted in Rive.<p style="margin:8px 0 0">' + (x.url ? '<a href="' + esc(x.url) + '" target="_blank"><button class="sm">Open in Rive</button></a>' : '') + '<button class="sm alt" data-del="' + i + '">Remove from list</button><button class="sm alt" data-cancel="1">Cancel</button></p></div>' : '';
+      return '<div class="recent"><div class="rtop"><b>' + esc(x.title || x.name) + '</b><span class="muted">' + (x.time ? ago(x.time) + (x.pushed ? ' · pushed' : ' · not pushed') : 'in your account') + '</span></div><div class="rbtns">' +
+        (x.url ? '<a href="' + esc(x.url) + '" target="_blank"><button class="sm alt">Open in Rive</button></a><button class="sm alt" data-copy="' + i + '">Copy link</button>' : '') +
+        (x.ids && x.ids.length ? '<button class="sm alt" data-resend="' + i + '" title="Select the same frames again and update the same Rive file. Renamed frames and layers are updated too.">Update</button>' : '') +
+        '</div>' + ask + (delAsk === 'p' + i ? '' : trashBtn('data-ptrash', i)) + '</div>';
+    }).join('');
+  } else {
+    recents.forEach(function (x) {
+      if ((x.frames && x.frames.length) || tried[x.name]) return;
+      tried[x.name] = true;
+      call('/artboards?name=' + encodeURIComponent(x.name)).then(function (r) { if (r.names && r.names.length) { delete artErr[x.name]; x.frames = r.names; x.fb = true; saveSettings(); } else artErr[x.name] = 'no artboards found in its export'; if (recentTab === 'artboards') renderRecents(); }).catch(function (er) { artErr[x.name] = String(er.message || er); if (recentTab === 'artboards') renderRecents(); });
+    });
+    var hiddenCount = 0; recents.forEach(function (x) { hiddenCount += Object.keys(x.hidden || {}).length; });
+    recents.forEach(function (x) {
+      var fid = projFileId(x); if (!fid || liveTried[fid]) return; liveTried[fid] = true;
+      call('/artboards?fileId=' + fid).then(function (r) { if (r.ok) { delete liveErr[fid]; liveCache[fid] = r.artboards; } else { liveErr[fid] = r.error === 'not found' ? 'restart the helper to read Rive' : (r.error || 'could not read the file'); } renderRecents(); }).catch(function (er) { liveErr[fid] = 'helper not reachable'; renderRecents(); });
+    });
+    recents.forEach(function (x, i) {
+      x.__live = false;
+      var fid = projFileId(x), live = fid && liveCache[fid];
+      if (fid && !live) { x.__live = true; return; } // has a Rive file: show only what is really in it (or why we can't read it)
+      if (!live) return;
+      var byName = {}; (x.frames || []).forEach(function (f, k) { byName[String(f).trim()] = x.fb ? undefined : (x.ids || [])[k]; });
+      var seen = {};
+      live.forEach(function (a) { seen[a.name.trim()] = true; var id = byName[a.name.trim()], key = id || a.name; if (!(x.hidden || {})[key]) items.push({ i: i, key: key, frame: a.name, id: id, comp: a.component, project: x.name, projectTitle: x.title, time: x.time, url: x.url, live: true }); });
+      x.__live = true;
+    });
+    recents.forEach(function (x, i) { if (x.__live) return; (x.frames || []).forEach(function (f, k) { var fid = x.fb ? undefined : (x.ids || [])[k], key = fid || f; if (!(x.hidden || {})[key]) items.push({ i: i, key: key, frame: String(f).trim(), id: fid, project: x.name, projectTitle: x.title, time: x.time, url: x.url }); }); });
+    body = items.length ? items.map(function (it, j) {
+      var ask = delAsk === 'a' + j ? '<div class="box bad" style="margin:8px 0 0"><b>Delete “' + esc(it.frame) + '” from Rive?</b><br><span class="muted">A backup is saved.</span><p style="margin:8px 0 0"><button class="sm" data-adelok="' + j + '">Delete from Rive</button><button class="sm alt" data-cancel="1">Cancel</button></p></div>' : '';
+      return '<div class="recent"><div class="rtop"><b>' + esc(it.frame) + '</b><span class="muted">' + (it.missing ? 'not in Rive' : it.comp ? 'component' : it.live ? 'in Rive' : ago(it.time)) + '</span></div><div class="muted">in ' + esc(it.projectTitle || it.project) + '</div>' + (delMsg[it.key + '|' + it.project] ? '<div class="muted" style="margin-top:4px">' + esc(delMsg[it.key + '|' + it.project]) + '</div>' : '') + '<div class="rbtns">' +
+        (it.id ? '<button class="sm alt" data-pick="' + j + '" title="Select this frame in Figma">Select in Figma</button>' : '') +
+        (it.url ? '<a href="' + esc(it.url) + '" target="_blank"><button class="sm alt">Open in Rive</button></a>' : '') +
+        (it.id && /\/\d+\s*$/.test(it.url || '') ? '<button class="sm alt" data-aupdate="' + j + '" title="Update only this artboard in the Rive file. The other artboards are not touched.">Update</button>' : (it.id ? '<button class="sm alt" disabled title="Push this project to Rive first, then you can update single artboards.">Update</button>' : '')) + '</div>' + ask + (delAsk === 'a' + j ? '' : trashBtn('data-atrash', j)) + '</div>';
+    }).join('') : '<p class="muted">No artboards yet.</p>' + Object.keys(liveErr).map(function (k) { return '<p class="muted">Rive file ' + esc(k) + ': ' + esc(liveErr[k]) + '</p>'; }).join('') + Object.keys(artErr).map(function (k) { return '<p class="muted">' + esc(k) + ': ' + esc(artErr[k]) + '</p>'; }).join('') + (hiddenCount ? '<p><button class="sm alt" id="showHidden">Show ' + hiddenCount + ' hidden</button></p>' : '');
+  }
+  el.innerHTML = head + body;
+  refreshAddTo();
+  function on(sel, fn) { Array.prototype.forEach.call(el.querySelectorAll(sel), fn); }
+  function hide(it) { var x = recents[it.i]; x.hidden = x.hidden || {}; x.hidden[it.key] = true; saveSettings(); }
+  on('#rrefresh', function (b) { b.onclick = function () { if (refreshing) return; refreshing = Date.now(); tried = {}; liveTried = {}; syncAccount(); b.classList.add('spin'); parent.postMessage({ pluginMessage: { type: 'loadSettings' } }, '*'); setTimeout(function () { if (refreshing) { refreshing = false; renderRecents(); } }, 2500); }; });
+  on('#showHidden', function (b) { b.onclick = function () { recents.forEach(function (x) { x.hidden = {}; }); saveSettings(); renderRecents(); }; });
+  on('button[data-rt]', function (b) { b.onclick = function () { recentTab = b.getAttribute('data-rt'); delAsk = null; syncAccount(); if (recentTab === 'artboards') { liveTried = {}; tried = {}; resolveNames(); } renderRecents(); }; });
+  on('button[data-cancel]', function (b) { b.onclick = function () { delAsk = null; renderRecents(); }; });
+  on('button[data-ptrash]', function (b) { b.onclick = function (e) { var i = +b.getAttribute('data-ptrash'); if (e.metaKey || e.ctrlKey) { delAsk = 'p' + i; renderRecents(); } else { recents.splice(i, 1); saveSettings(); renderRecents(); } }; });
+  on('button[data-del]', function (b) { b.onclick = function () { recents.splice(+b.getAttribute('data-del'), 1); delAsk = null; saveSettings(); renderRecents(); }; });
+  on('button[data-atrash]', function (b) { b.onclick = function (e) { var j = +b.getAttribute('data-atrash'); if (e.metaKey || e.ctrlKey) { delAsk = 'a' + j; renderRecents(); } else { hide(items[j]); renderRecents(); } }; });
+  on('button[data-adelok]', function (b) {
+    b.onclick = function () {
+      var it = items[+b.getAttribute('data-adelok')]; b.disabled = true; b.textContent = 'Deleting…';
+      call('/delete-artboard', { name: it.project, artboard: it.frame }).then(function (r) {
+        delAsk = null;
+        if (r.ok || r.gone) { hide(it); if (!r.ok) delMsg[it.key + '|' + it.project] = ''; }
+        else delMsg[it.key + '|' + it.project] = r.output;
+        renderRecents();
+        if (!r.ok && !r.gone) out.innerHTML = '<div class="box bad"><b>Could not delete the artboard.</b><pre>' + esc(r.output) + '</pre></div>';
+        else if (r.gone) out.innerHTML = '<div class="box info">' + esc(r.output) + ' I removed it from your list.</div>';
+        else out.innerHTML = '<div class="box ok"><b>Deleted “' + esc(it.frame) + '” from the Rive file.</b></div>';
+      }).catch(function (er) { delAsk = null; renderRecents(); out.innerHTML = '<div class="box bad"><b>Could not reach the helper.</b> ' + esc(er.message) + '</div>'; });
+    };
+  });
+  on('button[data-aupdate]', function (b) {
+    b.onclick = function () {
+      var it = items[+b.getAttribute('data-aupdate')], fid = (String(it.url).match(/\/(\d+)\s*$/) || [])[1];
+      if (!fid) return;
+      viaUpdate = true; artTarget = { name: it.project }; forceReplace = true;
+      resendPrev = linkEl.value; linkEl.value = fid;
+      parent.postMessage({ pluginMessage: { type: 'select', ids: [it.id] } }, '*');
+      setTimeout(function () { ask('send'); }, 450);
+    };
+  });
+  on('button[data-pick]', function (b) { b.onclick = function () { parent.postMessage({ pluginMessage: { type: 'select', ids: [items[+b.getAttribute('data-pick')].id] } }, '*'); }; });
+  on('button[data-copy]', function (b) {
+    b.onclick = function () { var ok = copyText(recents[+b.getAttribute('data-copy')].url); b.textContent = ok ? 'Copied' : 'Select and copy from Open'; setTimeout(function () { b.textContent = 'Copy link'; }, 1500); };
+  });
+  on('button[data-resend]', function (b) {
+    b.onclick = function () {
+      var x = recents[+b.getAttribute('data-resend')];
+      viaUpdate = true; projEl.value = x.name; nameEdited = true; resendPrev = linkEl.value; linkEl.value = (x.mode ? x.mode === 'existing' : /^\d+$/.test(x.link || '')) ? x.link : ''; // old entries: only a plain file id means an open-file send
+      parent.postMessage({ pluginMessage: { type: 'select', ids: x.ids } }, '*');
+      setTimeout(function () { ask('send'); }, 450);
+    };
+  });
+}
+// ---- what changed since the last export of this file ----------------------
+function hash(str) { var h = 5381, i; for (i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+function flatten(nodes) {
+  var map = {}, count = 0;
+  (function walk(list, path) {
+    (list || []).forEach(function (n) {
+      if (count++ > 3000) return;
+      var sig = hash(JSON.stringify([n.fills, n.strokes, n.effects, n.opacity, n.cornerRadius, n.visible, n.layoutMode, n.fontSize, n.fontName, n.itemSpacing, n.paddingLeft, n.paddingTop]));
+      var chars = n.characters == null ? null : String(n.characters);
+      map[n.id] = [n.name, n.type, Math.round(n.width), Math.round(n.height), Math.round(n.x), Math.round(n.y), chars == null ? null : chars.slice(0, 60), chars == null ? null : hash(chars), sig, path];
+      walk(n.children, (path ? path + ' / ' : '') + n.name);
+    });
+  })(nodes, '');
+  return map;
+}
+function diffSnaps(prev, cur) {
+  var d = { added: [], removed: [], renamed: [], text: [], moved: [], style: [] }, id;
+  for (id in cur) {
+    var c = cur[id], p = prev[id];
+    if (!p) { d.added.push(c[0]); continue; }
+    if (p[0] !== c[0]) d.renamed.push(p[0] + ' \u2192 ' + c[0]);
+    if (c[7] !== p[7]) d.text.push(c[0] + ': \u201C' + (p[6] || '') + '\u201D \u2192 \u201C' + (c[6] || '') + '\u201D');
+    if (c[2] !== p[2] || c[3] !== p[3] || c[4] !== p[4] || c[5] !== p[5]) d.moved.push(c[0] + (c[2] !== p[2] || c[3] !== p[3] ? ' (' + p[2] + '\u00D7' + p[3] + ' \u2192 ' + c[2] + '\u00D7' + c[3] + ')' : ' (moved)'));
+    if (c[8] !== p[8]) d.style.push(c[0]);
+  }
+  for (id in prev) if (!cur[id]) d.removed.push(prev[id][0]);
+  return d;
+}
+function cardHtml(title, badge, body, sev) {
+  return '<div class="issue ' + sev + '"><button class="ihead" data-tog="1" aria-expanded="false"><span class="ititle">' + title + '</span>' + (badge !== '' && badge != null ? '<span class="muted">' + badge + '</span>' : '') + '<span class="chev" aria-hidden="true"></span></button><div class="ibody" hidden>' + body + '</div></div>';
+}
+out.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('.ihead[data-tog]'); if (!b) return;
+  var card = b.parentNode, body = card.querySelector('.ibody');
+  body.hidden = !body.hidden; card.classList.toggle('open', !body.hidden); b.setAttribute('aria-expanded', String(!body.hidden));
+});
+function changesHtml(d, when, all) {
+  var rows = [['added', 'New layers'], ['removed', 'Removed layers'], ['renamed', 'Renamed'], ['text', 'Text changed'], ['moved', 'Resized or moved'], ['style', 'Look changed']], total = 0, h = '';
+  rows.forEach(function (r) {
+    var list = d[r[0]]; if (!list.length) return; total += list.length;
+    h += '<div style="margin-top:6px"><b>' + r[1] + '</b> <span class="muted">' + list.length + '</span><ul>' + list.slice(0, all ? list.length : 8).map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + (!all && list.length > 8 ? '<li class="muted">+' + (list.length - 8) + ' more</li>' : '') + '</ul></div>';
+  });
+  return cardHtml('Changes' + (when ? ' since ' + ago(when) : ''), total || 'none', total ? h : '<span class="muted">No changes.</span>', 'info');
+}
+var DEST_HINT = { account: 'Creates a file in your account and keeps updating it.', open: 'Adds to a file you already have open in Rive.' };
+function applyDest(mode) {
+  curDest = mode;
+  Array.prototype.forEach.call(document.querySelectorAll('#destTabs .rtab'), function (b) { b.classList.toggle('on', b.getAttribute('data-dest') === mode); });
+  document.getElementById('linkWrap').hidden = mode !== 'open';
+  document.getElementById('destHint').textContent = DEST_HINT[mode];
+  refreshAddTo();
+  linkEl.value = mode === 'open' ? (links[curFile] || '') : '';
+}
+Array.prototype.forEach.call(document.querySelectorAll('#destTabs .rtab'), function (b) {
+  b.onclick = function () { applyDest(b.getAttribute('data-dest')); if (curFile) { dests[curFile] = curDest; saveSettings(); } if (curDest === 'open') linkEl.focus(); };
+});
+function projFileId(x) { return ((String(x.url || '').match(/\/(\d+)\s*$/) || [])[1]) || ''; }
+function refreshAddTo() {
+  var sel = document.getElementById('addTo'), wrap = document.getElementById('addWrap');
+  var opts = recents.filter(function (x) { return projFileId(x); });
+  if (!opts.some(function (x) { return x.name === addTo; })) addTo = '';
+  sel.innerHTML = '<option value="">New project</option>' + opts.map(function (x) { return '<option value="' + esc(x.name) + '"' + (x.name === addTo ? ' selected' : '') + '>Add to: ' + esc(x.title || x.name) + '</option>'; }).join('');
+  wrap.hidden = !(curDest === 'account' && opts.length);
+}
+document.getElementById('addTo').onchange = function () { addTo = this.value; };
+function prepAddTo() {
+  if (curDest !== 'account' || !addTo || artTarget) return;
+  var x = recents.filter(function (r) { return r.name === addTo; })[0], fid = x && projFileId(x);
+  if (!fid) return;
+  artTarget = { name: addTo }; forceReplace = true; resendPrev = linkEl.value; linkEl.value = fid;
+}
+function mergeFrames(name, ids, names) {
+  recents.forEach(function (x) {
+    if (x.name !== name) return;
+    x.frames = x.frames || []; x.ids = x.ids || [];
+    ids.forEach(function (id, i) {
+      if (x.fb) { if (x.frames.indexOf(names[i]) < 0) x.frames.push(names[i]); return; }
+      var k = x.ids.indexOf(id);
+      if (k < 0) { x.ids.push(id); x.frames.push(names[i]); } else x.frames[k] = names[i];
+    });
+  });
+}
+// ---- Clean tab: tidy names and snap pixels on the selected Figma layers ----------------------------
+function cleanOptsUi() { return { deep: document.getElementById('cDeep').checked, spaces: document.getElementById('cnSpaces').checked, symbols: document.getElementById('cnSymbols').checked, generic: document.getElementById('cnGeneric').checked, pos: document.getElementById('cpPos').checked, size: document.getElementById('cpSize').checked, hl: document.getElementById('chLayers').checked, hp: document.getElementById('chPaints').checked }; }
+var cleanTimer = null;
+function scanClean() { clearTimeout(cleanTimer); cleanTimer = setTimeout(function () { parent.postMessage({ pluginMessage: { type: 'cleanScan', o: cleanOptsUi() } }, '*'); }, 150); }
+function cleanApply(which) { parent.postMessage({ pluginMessage: { type: 'cleanApply', which: which, o: cleanOptsUi() } }, '*'); }
+Array.prototype.forEach.call(document.querySelectorAll('#paneClean input'), function (i) { i.onchange = scanClean; });
+document.getElementById('cnApply').onclick = function () { cleanApply('names'); };
+document.getElementById('cpApply').onclick = function () { cleanApply('pixels'); };
+document.getElementById('chApply').onclick = function () { cleanApply('hidden'); };
+function trySend() { var b = document.getElementById('send'); if (!b.disabled) b.click(); }
+document.getElementById('send').onclick = function () { prepAddTo(); ask('send'); };
+var settingsEl = document.getElementById('settings'), gearEl = document.getElementById('gear'), tokenNote = document.getElementById('tokenNote');
+function toggleSettings(open) { settingsEl.hidden = !open; gearEl.classList.toggle('on', open); if (open) tokenEl.focus(); }
+function saveSettings() { parent.postMessage({ pluginMessage: { type: 'saveSettings', token: tokenEl.value.trim(), fileLink: linkEl.value.trim(), opts: opts(), links: links, recents: recents, snaps: snaps, dests: dests } }, '*'); }
+var dotEl = document.getElementById('dot'), stateEl = document.getElementById('helperState');
+function setHelper(cls, text) { dotEl.className = 'dot ' + cls; dotEl.title = 'Helper: ' + text; stateEl.textContent = 'Helper: ' + text; }
+function checkHelper() {
+  if (!tokenEl.value.trim()) { setHelper('off', 'no token yet'); return; }
+  call('/status').then(function (r) { setHelper(r.ok ? 'ok' : 'bad', r.ok ? 'connected (' + String(r.rive || '').split('\n')[0] + ')' : 'running, but Rive CLI problem'); })
+    .catch(function (er) { setHelper(/bad token/.test(er.message) ? 'bad' : 'off', /bad token/.test(er.message) ? 'token not accepted, paste the one from the helper window' : 'not running, open Start Helper.command'); });
+}
+window.addEventListener('focus', checkHelper);
+gearEl.onclick = function () { tokenNote.textContent = ''; toggleSettings(settingsEl.hidden); };
+tokenEl.onkeydown = function (e) {
+  if (e.key !== 'Enter') return;
+  if (!tokenEl.value.trim()) { tokenNote.textContent = 'Paste the token first.'; return; }
+  saveSettings(); tokenNote.textContent = 'Saved.'; checkHelper();
+  setTimeout(function () { toggleSettings(false); }, 600);
+};
+projEl.oninput = function () { nameEdited = !!projEl.value.trim(); };
+projEl.onkeydown = linkEl.onkeydown = function (e) { if (e.key === 'Enter') trySend(); };
+linkEl.onchange = linkChanged;
+document.getElementById('zip').onclick = function () { ask('zip'); };
+function call(path, body) {
+  return fetch(HELPER + path, { method: body ? 'POST' : 'GET', headers: { 'content-type': 'application/json', 'x-token': tokenEl.value.trim() }, body: body ? JSON.stringify(body) : undefined })
+    .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || r.status); return j; }); });
+}
+function notesHtml(res) {
+  return (res.notes && res.notes.length) ? cardHtml('Notes', res.notes.length, '<ul>' + res.notes.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>', 'info') : '';
+}
+function warningsHtml(res) {
+  return res.warnings.length ? cardHtml('Not converted', res.warnings.length, '<ul>' + res.warnings.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>', 'warning') : '';
+}
+function zipHtml(res, name) {
+  var enc = new TextEncoder();
+  var imgFiles = res.images.map(function (im) { return { path: name + '/' + im.file, data: last.bytes[im.hash] }; });
+  var zip = makeZip(imgFiles.concat([
+    { path: name + '/scene.rml', data: enc.encode(res.rml) }, { path: name + '/rive.yaml', data: enc.encode(res.yaml) },
+    { path: name + '/fonts/README.txt', data: enc.encode('Put these font files here:\n' + res.fonts.map(function (f) { return f.file.replace('fonts/', ''); }).join('\n') + '\n') }]));
+  var url = URL.createObjectURL(new Blob([zip], { type: 'application/zip' }));
+  return '<p style="margin-top:12px"><a download="' + name + '.zip" href="' + url + '"><button class="alt">Download ' + name + '.zip</button></a></p>';
+}
+// ---- tabs + design analysis ----------------------------------------
+var paneImport = document.getElementById('paneImport'), paneAnalysis = document.getElementById('paneAnalysis');
+var tabImport = document.getElementById('tabImport'), tabAnalysis = document.getElementById('tabAnalysis');
+var analysisOut = document.getElementById('analysisOut'), selInfo = document.getElementById('selInfo'), analysisTimer = null;
+function showTab(which) {
+  var a = which === 'analysis', cl = which === 'clean';
+  paneAnalysis.hidden = !a; paneImport.hidden = a || cl; document.getElementById('paneClean').hidden = !cl;
+  tabAnalysis.classList.toggle('on', a); tabImport.classList.toggle('on', which === 'import'); document.getElementById('tabClean').classList.toggle('on', cl);
+  if (a) runAnalysis();
+  if (cl) scanClean();
+}
+tabImport.onclick = function () { showTab('import'); };
+document.getElementById('tabClean').onclick = function () { showTab('clean'); };
+tabAnalysis.onclick = function () { showTab('analysis'); };
+document.getElementById('runAnalysis').onclick = function () { runAnalysis(); };
+document.getElementById('sendClaude').onclick = function () {
+  analysisOut.insertAdjacentHTML('afterbegin', '<div class="box" id="sendNote">Reading the design and previews…</div>');
+  parent.postMessage({ pluginMessage: { type: 'sendToClaude' } }, '*');
+};
+function sendToInbox(m) {
+  var name = projectName(m, 'figma-design');
+  var report = FigmaAnalyze.analyze(m, { componentArtboards: optComp.checked, frameMode: optArt.checked ? 'artboard' : 'layout' });
+  var snapshot = { nodes: m.nodes, components: m.components, images: m.images };
+  var previews = (m.previews || []).map(function (p) { return { name: p.name, base64: toB64(p.bytes) }; });
+  var note = document.getElementById('sendNote');
+  function show(cls, html) { if (note) { note.className = 'box ' + cls; note.innerHTML = html; } else analysisOut.insertAdjacentHTML('afterbegin', '<div class="box ' + cls + '">' + html + '</div>'); }
+  call('/inbox', { name: name, report: report, snapshot: snapshot, previews: previews }).then(function (r) {
+    show('ok', '<b>Sent to Claude.</b><br>Saved ' + r.previews + ' preview image(s), the report and the design data in <code>Exports/claude-inbox</code>.<br>Now tell Claude in the chat: <b>“check the inbox”</b>.');
+  }).catch(function (er) {
+    show('bad', '<b>Could not reach the helper.</b> ' + esc(er.message) + '<br>Run <code>node serve.js</code> in the plugin folder, and paste its token on the Import tab.');
+  });
+}
+function runAnalysis() { analysisOut.innerHTML = '<p class="muted">Analysing…</p>'; parent.postMessage({ pluginMessage: { type: 'analyze' } }, '*'); }
+var expanded = {}, expandedText = {};
+function renderAnalysis(snap) {
+  window.lastSnap = snap;
+  var r = FigmaAnalyze.analyze(snap, { componentArtboards: optComp.checked, frameMode: optArt.checked ? 'artboard' : 'layout' });
+  window.lastAnalysis = r;
+  var col = r.counts.error ? '#f87171' : r.counts.warning ? '#fbbf24' : '#4ade80';
+  var h = '<div class="score"><b class="n" style="color:' + col + '">' + r.score + '</b><div><b>' + esc(r.verdict) + '</b><br>' +
+    '<span class="pill error">' + r.counts.error + ' to fix</span><span class="pill warning">' + r.counts.warning + ' differences</span><span class="pill info">' + r.counts.info + ' tips</span><br>' +
+    '<span class="muted">' + r.stats.nodes + ' layers · ' + r.stats.frames + ' frames · ' + r.stats.autoLayoutFrames + ' with auto layout · ' + r.stats.texts + ' text · ' + r.stats.images + ' images</span></div></div>';
+  if (!r.issues.length) h += '<div class="empty"><b>Nothing to fix.</b><br><span class="muted">This design should import cleanly.</span></div>';
+  var label = { error: 'Fix before importing', warning: 'Will look different', info: 'Good to know' };
+  ['error', 'warning', 'info'].forEach(function (sev) {
+    var group = r.issues.filter(function (i) { return i.severity === sev; });
+    if (!group.length) return;
+    h += '<div class="group-title">' + label[sev] + ' · ' + group.length + '</div>';
+    group.forEach(function (i) {
+      var ids = i.nodes.map(function (n) { return n.id; });
+      var SHOW = 3, open = !!expanded[i.id];
+      function chip(n) { return '<button class="chip" title="Select this layer in Figma" data-one="' + esc(n.id) + '">' + esc(n.name || n.id) + '</button>'; }
+      var layers = '';
+      if (i.nodes.length) {
+        layers = '<div class="layers"><div class="row">' + i.nodes.slice(0, SHOW).map(chip).join('') + '</div>';
+        if (i.nodes.length > SHOW) {
+          layers += '<div class="row more"' + (open ? '' : ' hidden') + '>' + i.nodes.slice(SHOW).map(chip).join('') + '</div>' +
+            '<button class="linkbtn" data-toggle="' + esc(i.id) + '">' + (open ? 'See less' : 'See ' + (i.count - SHOW) + ' more') + '</button>';
+        }
+        layers += (ids.length > 1 ? '<button class="sm alt" data-ids="' + esc(ids.join(',')) + '">Select all ' + (i.count > ids.length ? 'first ' + ids.length : ids.length) + '</button>' : '') + '</div>';
+      }
+      var openCard = !!expandedText[i.id];
+      h += '<div class="issue ' + sev + (openCard ? ' open' : '') + '"><button class="ihead" data-card="' + esc(i.id) + '" aria-expanded="' + openCard + '"><span class="ititle">' + esc(i.title) + '</span>' + (i.count > 1 ? '<span class="muted">\u00D7' + i.count + '</span>' : '') + '<span class="chev" aria-hidden="true"></span></button>' +
+        '<div class="ibody"' + (openCard ? '' : ' hidden') + '><div class="why">' + esc(i.why) + '</div>' +
+        '<div class="fix"><b>How to fix:</b> ' + esc(i.fix) + '</div>' +
+        layers + '</div></div>';
+    });
+  });
+  h += '<p style="margin-top:16px"><button id="goImport">' + (r.counts.error ? 'Import anyway' : 'Go to import') + '</button></p>';
+  analysisOut.innerHTML = h;
+  function selectIds(ids, btn) {
+    Array.prototype.forEach.call(analysisOut.querySelectorAll('.chip.on'), function (c) { c.classList.remove('on'); });
+    if (btn && btn.classList) btn.classList.add('on');
+    parent.postMessage({ pluginMessage: { type: 'select', ids: ids } }, '*');
+  }
+  Array.prototype.forEach.call(analysisOut.querySelectorAll('button[data-ids]'), function (b) {
+    b.onclick = function () { selectIds(b.getAttribute('data-ids').split(','), null); };
+  });
+  Array.prototype.forEach.call(analysisOut.querySelectorAll('button[data-one]'), function (b) {
+    b.onclick = function () { selectIds([b.getAttribute('data-one')], b); };
+  });
+  Array.prototype.forEach.call(analysisOut.querySelectorAll('button[data-toggle]'), function (b) {
+    b.onclick = function () {
+      var id = b.getAttribute('data-toggle'), more = b.parentNode.querySelector('.more');
+      expanded[id] = !expanded[id]; more.hidden = !expanded[id];
+      b.textContent = expanded[id] ? 'See less' : 'See ' + (more.querySelectorAll('.chip').length) + ' more';
+    };
+  });
+  Array.prototype.forEach.call(analysisOut.querySelectorAll('button[data-card]'), function (b) {
+    b.onclick = function () {
+      var id = b.getAttribute('data-card'), card = b.parentNode, body = card.querySelector('.ibody');
+      expandedText[id] = !expandedText[id]; body.hidden = !expandedText[id]; card.classList.toggle('open', !!expandedText[id]); b.setAttribute('aria-expanded', !!expandedText[id]);
+    };
+  });
+  document.getElementById('goImport').onclick = function () { showTab('import'); };
+}
+onmessage = function (e) {
+  var m = e.data.pluginMessage; if (!m) return;
+  if (m.type === 'analysisSnapshot') { renderAnalysis(m); return; }
+  if (m.type === 'claudePayload') { sendToInbox(m); return; }
+  if (m.type === 'cleanScanResult') {
+    var any = !m.empty, ex = function (l) { return l && l.length ? '<br>' + l.map(esc).join('<br>') : ''; };
+    document.getElementById('cleanSel').textContent = m.empty ? 'Select layers or frames to clean.' : 'Cleaning the current selection.';
+    document.getElementById('cnInfo').innerHTML = m.empty ? '' : (m.names.count ? '<b>' + m.names.count + '</b> layer name' + (m.names.count === 1 ? '' : 's') + ' to tidy' + ex(m.names.examples) : 'Names are already clean.');
+    document.getElementById('cpInfo').innerHTML = m.empty ? '' : (m.pixels.count ? '<b>' + m.pixels.count + '</b> layer' + (m.pixels.count === 1 ? ' is' : 's are') + ' off the pixel grid' + ex(m.pixels.examples) : 'Everything is on the pixel grid.');
+    var hc = m.empty ? 0 : m.hidden.layers + m.hidden.paints;
+    document.getElementById('chInfo').innerHTML = m.empty ? '' : (hc ? '<b>' + m.hidden.layers + '</b> hidden layer' + (m.hidden.layers === 1 ? '' : 's') + ', <b>' + m.hidden.paints + '</b> hidden fill/stroke/effect' + (m.hidden.paints === 1 ? '' : 's') + ex(m.hidden.examples) : 'Nothing hidden to remove.');
+    document.getElementById('chApply').disabled = m.empty || !hc;
+    document.getElementById('cnApply').disabled = m.empty || !m.names.count; document.getElementById('cpApply').disabled = m.empty || !m.pixels.count;
+    return;
+  }
+  if (m.type === 'cleanDone') {
+    document.getElementById('cleanOut').innerHTML = '<div class="box ok"><b>' + (m.which === 'names' ? 'Renamed ' : m.which === 'hidden' ? 'Removed ' : 'Snapped ') + m.done + (m.which === 'hidden' ? ' hidden item' : ' layer') + (m.done === 1 ? '' : 's') + '.</b><br><span class="muted">Press Cmd+Z in Figma to undo.</span></div>';
+    return;
+  }
+  if (m.type === 'selection') {
+    if (!document.getElementById('paneClean').hidden) scanClean();
+    showSelection(m);
+    selInfo.textContent = m.count ? m.count + ' selected' : 'nothing selected';
+    if (!paneAnalysis.hidden) { clearTimeout(analysisTimer); analysisTimer = setTimeout(runAnalysis, 400); }
+    return;
+  }
+  if (m.type === 'names') {
+    var changed = false;
+    recents.forEach(function (x) { if (x.fb) return; (x.ids || []).forEach(function (id, k) { var nm = m.map[id]; if (nm != null && x.frames && x.frames[k] !== nm) { x.frames[k] = nm; changed = true; } }); });
+    if (changed) { saveSettings(); renderRecents(); }
+    return;
+  }
+  if (m.type === 'settings' && refreshing) { var wait = Math.max(0, 800 - (Date.now() - refreshing)); refreshing = false; recents = m.recents || recents; snaps = m.snaps || snaps; delAsk = null; setTimeout(function () { renderRecents(); resolveNames(); syncAccount(); }, wait); return; }
+  if (m.type === 'settings') { tokenEl.value = m.token; if (!m.token) toggleSettings(true); checkHelper(); links = m.links || {}; recents = m.recents || []; snaps = m.snaps || {}; dests = m.dests || {}; var sf = m.selection && m.selection.file; if (m.fileLink && sf && !links[sf]) links[sf] = m.fileLink; renderRecents(); resolveNames(); syncAccount(); if (m.opts) { optArt.checked = m.opts.artboard !== false; optComp.checked = m.opts.comp !== false; optInner.checked = m.opts.inner !== false; optAuto.checked = m.opts.autoPush === true; optReplace.checked = m.opts.replace !== false; optLink.checked = m.opts.link !== false; optSafe.checked = m.opts.safe === true || m.opts.webflow === true; syncSafe(); } showSelection(m.selection); return; }
+  if (m.type === 'error') { artTarget = null; forceReplace = false; viaUpdate = false; if (resendPrev !== null) { linkEl.value = resendPrev; resendPrev = null; }
+    out.innerHTML = '<div class="box bad">' + esc(m.message) + '</div>'; return; }
+  if (m.type !== 'snapshot') return;
+  var name = projectName(m, 'figma-import');
+  var res = FigmaToRive.convert({ nodes: m.nodes, components: m.components, images: m.images }, { name: name, frameMode: optArt.checked ? 'artboard' : 'layout', componentArtboards: optComp.checked, linkComponents: optLink.checked, innerShadowOverChildren: optInner.checked });
+  if (optSafe.checked && window.WebflowSafe) res.rml = WebflowSafe.apply(res.rml);   // target is Webflow; Framer is locked for now
+  last = { name: name, bytes: m.imageBytes || {} };
+  if (mode === 'zip') { out.innerHTML = '<div class="box ok">Converted ' + m.nodes.length + ' frame(s).</div>' + notesHtml(res) + warningsHtml(res) + zipHtml(res, name); return; }
+  if (m.fileName) curFile = curFile || m.fileName;
+  var fileId = ((linkEl.value.match(/file\/[^\/]+\/(\d+)/) || linkEl.value.match(/^\s*(\d+)\s*$/) || [])[1]) || '';
+  var linkUsed = linkEl.value; // what this send really uses (Update may differ from the field)
+  if (resendPrev !== null) { linkEl.value = resendPrev; resendPrev = null; } else linkChanged(); // Update must not change the remembered link
+  if (linkUsed.trim() && !fileId) { out.innerHTML = '<div class="box bad">I could not find a file id in that link. It should look like https://editor.rive.app/file/name/1234567</div>'; return; }
+  var curSnap = flatten(m.nodes), wasUpdate = viaUpdate, target = artTarget, forced = forceReplace; viaUpdate = false; artTarget = null; forceReplace = false;
+  var selIds = (m.nodes || []).map(function (n) { return n.id; }), frameNames = (m.nodes || []).map(function (n) { return n.name; });
+  var replacePairs = [];
+  if (fileId && (optReplace.checked || forced)) {
+    var pmapOf = function (key) { return (snaps[key] || {}).map || {}; };
+    var pmap = {}; [snaps['file-' + fileId] && 'file-' + fileId, target && target.name].forEach(function (k) { if (k) { var mp = pmapOf(k); for (var id in mp) if (!pmap[id]) pmap[id] = mp[id]; } });
+    (m.nodes || []).forEach(function (n) { var nw = String(n.name).trim(); replacePairs.push({ old: pmap[n.id] ? String(pmap[n.id][0]).trim() : nw, new: nw }); });
+    (res.componentNames || []).forEach(function (nm) { replacePairs.push({ old: nm, new: nm }); });
+  }
+  function runExport() {
+  out.innerHTML = '<div class="box">Sending to the helper…</div>';
+  return call('/export', { name: name, rml: res.rml, yaml: res.yaml, fonts: res.fonts, fileId: fileId, replace: replacePairs, images: res.images.map(function (im) { return { file: im.file, base64: toB64(last.bytes[im.hash]) }; }) }).then(function (r) {
+    var ok = r.verify.ok, f = r.fonts, html = '<div class="box ' + (ok ? 'ok' : 'bad') + '"><b>' + (ok ? 'Built and verified' : 'rive found errors') + '</b>' +
+      (r.mode === 'existing' ? '<br>' + (r.replaced && r.replaced.length ? 'Replaced: <b>' + r.replaced.map(esc).join(', ') + '</b><br>' : '') + 'Now in the file: <b>' + (r.added || []).map(esc).join(', ') + '</b>' : '') + (ok ? '' : '<pre>' + esc(r.verify.output) + '</pre>') + '</div>';
+    if (f.standIn.length) html += '<div class="box warn"><b>Stand-in fonts used</b><ul>' + f.standIn.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>Add them to <code>Fonts Library/</code> and send again.</div>';
+    if (f.missing.length) html += '<div class="box bad"><b>Missing fonts</b>: ' + f.missing.map(esc).join(', ') + '</div>';
+    html += notesHtml(res) + warningsHtml(res);
+    var prevSnap = snaps[r.name], changes = ok && prevSnap ? changesHtml(diffSnaps(prevSnap.map, curSnap), prevSnap.time) : (ok && wasUpdate ? '<div class="box info">No earlier record to compare. Changes show from the next update.</div>' : '');
+    if (ok) { snaps[r.name] = { time: Date.now(), map: curSnap }; var keep = Object.keys(snaps).sort(function (a, b) { return snaps[b].time - snaps[a].time; }); keep.slice(5).forEach(function (k) { delete snaps[k]; }); }
+    var banner = ok ? '<div class="box warn" id="notPushed"><b>Not pushed yet</b><p style="margin:8px 0 0"><button id="push">' + (r.mode === 'existing' ? 'Add to my Rive file' : 'Push to Rive') + '</button></p></div>' : '';
+    out.innerHTML = banner + changes + html + zipHtml(res, name);
+    var fileUrl = r.mode === 'existing' ? 'https://editor.rive.app/file/' + r.fileId : '';
+    var prev = recents.filter(function (x) { return x.name === r.name; })[0];
+    if (target) { mergeFrames(target.name, selIds, frameNames); patchRecent(target.name, { time: Date.now() }); } else addRecent({ name: r.name, mode: r.mode === 'existing' ? 'existing' : 'new', time: Date.now(), ids: selIds, frames: frameNames, link: r.mode === 'existing' ? String(r.fileId) : '', url: fileUrl || (prev && prev.url) || '', pushed: !!(prev && prev.pushed && r.mode !== 'existing') });
+    var pb = document.getElementById('push');
+    if (pb) pb.onclick = function () {
+      pb.disabled = true; pb.textContent = 'Pushing…';
+      call('/push', { name: r.name, label: 'Figma import' }).then(function (p) {
+        var h = '<div class="box ' + (p.ok ? 'ok' : 'bad') + '"><b>' + (p.ok ? 'Pushed to Rive' : 'Push failed') + '</b>' +
+          (p.url ? '<br><a href="' + p.url + '" target="_blank">' + p.url + '</a>' : '') + (p.ok ? '' : '<pre>' + esc(p.output) + '</pre>') + '</div>';
+        var np = document.getElementById('notPushed'); if (np && p.ok) np.parentNode.removeChild(np);
+        out.insertAdjacentHTML('afterbegin', h); pb.textContent = 'Pushed';
+        if (p.ok) patchRecent(target ? target.name : r.name, target ? { pushed: true, time: Date.now() } : { pushed: true, time: Date.now(), url: p.url || fileUrl, link: r.mode === 'existing' ? String(r.fileId || '') : '' });
+      }).catch(function (er) { out.insertAdjacentHTML('afterbegin', '<div class="box bad">' + esc(er.message) + '</div>'); pb.disabled = false; pb.textContent = 'Try again'; });
+    };
+    if (pb && optAuto.checked && !prevSnap && !wasUpdate) pb.click(); // an update always waits, so you can read the change report first
+  }).catch(function (er) {
+    out.innerHTML = '<div class="box bad"><b>Helper not reachable.</b> Start it with <code>Start Helper.command</code>. Zip still works.</div>' + warningsHtml(res) + zipHtml(res, name);
+  });
+  }
+  // Before sending: warn about fonts that are not in the library, and about updating a file that was already pushed.
+  var wanted = (res.fonts || []).map(function (f) { return String(f.file).replace(/^fonts\//, ''); });
+  var again = !fileId && recents.filter(function (x) { return x.name === name && x.pushed; })[0];
+  call('/status').then(function (st) { return st.realFonts || []; }, function () { return null; }).then(function (real) {
+    var miss = real ? wanted.filter(function (f) { return real.indexOf(f) < 0; }) : [], msgs = [];
+    if (miss.length) msgs.push(cardHtml('Fonts missing', miss.length, '<ul>' + miss.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul><span class="muted">A stand-in font is used.</span>', 'warning'));
+    var renamedAb = replacePairs.filter(function (x) { return x.old !== x.new; });
+    if (renamedAb.length) msgs.push(cardHtml('Artboard renamed in Rive', renamedAb.length, '<ul>' + renamedAb.map(function (x) { return '<li>' + esc(x.old) + ' \u2192 <b>' + esc(x.new) + '</b></li>'; }).join('') + '</ul><span class="muted">Replaces the old artboard. Edits you made to it in Rive are lost (backup saved).</span>', 'warning'));
+    if (again) msgs.push(cardHtml('Already pushed', '', 'This updates the same Rive file.', 'info'));
+    var gateKey = fileId ? 'file-' + fileId : name, before = snaps[gateKey];
+    if (before) msgs.unshift(changesHtml(diffSnaps(before.map, curSnap), before.time, true));
+    if (!msgs.length) { runExport(); return; }
+    out.innerHTML = msgs.join('') + '<div class="actions"><button id="goOn">Send anyway</button><button id="goStop" class="alt">Cancel</button></div>';
+    document.getElementById('goOn').onclick = runExport;
+    document.getElementById('goStop').onclick = function () { out.innerHTML = ''; };
+  });
+};
+</script>
+
