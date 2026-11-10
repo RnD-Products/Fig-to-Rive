@@ -4,13 +4,13 @@ Do these in order. The whole thing takes a few minutes.
 
 ## 1. Get the files
 ```bash
-git clone https://github.com/RnD-Products/riveCLi.git
+git clone https://github.com/RnD-Products/Fig-to-Rive.git
 ```
 The repo is private, so GitHub must be signed in on that computer: use GitHub Desktop, or run `gh auth login` first.
 
 ## 2. Run the setup check
 ```bash
-cd riveCLi/"Fig To Rive" && ./scripts/setup.sh
+cd Fig-to-Rive && ./scripts/setup.sh
 ```
 It checks Node.js, the Rive CLI, your Rive login, the fonts and the kit projects, and tells you what to fix.
 - If it says **Permission denied**, run `chmod +x scripts/setup.sh` once and try again.
